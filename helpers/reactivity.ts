@@ -11,7 +11,9 @@ export class Reactivity {
         this.data = data
         this.methods = methods;
         this.updating = false
+
     }
+
     makeReactive() {
         let reactiveData = new Proxy(this.data, this.proxyHandler());
 
@@ -42,7 +44,6 @@ export class Reactivity {
     update(vDom: VirtualDomInterface, methods: MethodsInterface, once: Boolean = false): Promise<HTMLElement> {
         return new Promise(res => {
             requestAnimationFrame(async () => {
-                console.log(vDom.element)
                 let stylings = vDom.attributes.bindedStyle
                 let handlers = vDom.attributes.handlers
                 let attrs = vDom.attributes.attr

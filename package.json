@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "tsc vytic.ts --outDir ./dist --target ES2019 --moduleResolution node"
+    "start": "ttsc --p tsconfig.json"
   },
   "watch": [
     "vytic"
@@ -13,13 +13,18 @@
   "author": "ilija marijanovic",
   "license": "MIT",
   "dependencies": {
+    "@babel/types": "^7.12.1",
     "babel": "^6.23.0",
+    "babel-plugin-add-import-extension": "^1.4.3",
     "nodemon": "^2.0.6",
+    "postcss": "^8.1.4",
     "webpack": "^5.3.2"
   },
   "ext": "ts",
   "devDependencies": {
+    "@zoltu/typescript-transformer-append-js-extension": "^1.0.1",
     "ts-loader": "^8.0.7",
+    "ttypescript": "^1.5.12",
     "typescript": "^4.0.5",
     "webpack-cli": "^4.1.0"
   }

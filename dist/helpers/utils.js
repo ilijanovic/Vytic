@@ -35,7 +35,7 @@ export function collectAttributes(element) {
         show: null,
         visible: true,
         parent: element.parentElement,
-        index: Array.prototype.indexOf.call(element.parentElement.children, element)
+        index: element.parentElement ? Array.prototype.indexOf.call(element.parentElement.children, element) : 0
     });
 }
 export function formatText(text) {

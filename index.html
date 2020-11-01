@@ -11,13 +11,13 @@
             {{ counter * 2 }}</p>
     </div>
     <custom-button></custom-button>
-
+    <custom-button></custom-button>
     <custom-button></custom-button>
     <custom-button></custom-button>
 
 </body>
 <script type="module">
-    import { Vytic } from "./dist/vytic.js"
+    import { Vytic, createWebComponent } from "./dist/vytic.js"
     let vytic = new Vytic({
         root: document.getElementById("root"),
         data: {
@@ -34,18 +34,19 @@
             }
         }
     })
-    Vytic.createWebComponent({
+
+    createWebComponent({
         name: "custom-button",
-        template: /*html*/`
-            <button @click="increase">Increase</button>
-            <p>Counter: {{ counter }}</p>
-           `
-        ,
+        template: `
+            <div>
+                <button @click="inc">Counter: {{counter}}</button>
+            </div>
+        `,
         data: {
             counter: 0
         },
         methods: {
-            increase() {
+            inc() {
                 this.counter++
             }
         }

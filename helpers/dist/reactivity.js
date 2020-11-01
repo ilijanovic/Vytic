@@ -88,7 +88,6 @@ var Reactivity = /** @class */ (function () {
                 return __generator(this, function (_b) {
                     switch (_b.label) {
                         case 0:
-                            console.log(vDom.element);
                             stylings = vDom.attributes.bindedStyle;
                             handlers = vDom.attributes.handlers;
                             attrs = vDom.attributes.attr;

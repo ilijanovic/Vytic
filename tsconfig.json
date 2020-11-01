@@ -1,9 +1,19 @@
 {
     "compilerOptions": {
-      "outDir": "./dist/",
+      "outDir": "./dist",
       "noImplicitAny": true,
-      "module": "None",
-      "target": "ES6",
-      "allowJs": true
-    }
+      "allowJs": true,
+      "module": "ES2020",
+      "target": "ES2018",
+      "moduleResolution": "node",
+      
+      "plugins": [
+        {
+          "transform": "@zoltu/typescript-transformer-append-js-extension/output/index.js",
+          "after": true,
+        }
+      ],
+    "declaration": false
+    },
+  
 }

@@ -1,4 +1,4 @@
-import { deleteElement, insertElement } from "./utils";
+import { deleteElement, insertElement } from "./utils.js";
 export class Reactivity {
     constructor(vDom, data, methods) {
         this.vDom = vDom;
@@ -33,7 +33,6 @@ export class Reactivity {
     update(vDom, methods, once = false) {
         return new Promise(res => {
             requestAnimationFrame(async () => {
-                console.log(vDom.element);
                 let stylings = vDom.attributes.bindedStyle;
                 let handlers = vDom.attributes.handlers;
                 let attrs = vDom.attributes.attr;

@@ -1,4 +1,4 @@
-import { collectAttributes, formatText } from "../helpers/utils";
+import { collectAttributes, formatText } from "../helpers/utils.js";
 export function parseHTML(html) {
     return {
         tag: html.tagName,

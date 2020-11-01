@@ -1,5 +1,5 @@
-import { parseHTML } from "./helpers/parser";
-import { Reactivity } from "./helpers/reactivity";
+import { parseHTML } from "./helpers/parser.js";
+import { Reactivity } from "./helpers/reactivity.js";
 export class Vytic {
     constructor({ root = null, data = {}, methods = {} }) {
         if (!root)
@@ -22,9 +22,10 @@ export function createWebComponent({ name, template, data, methods }) {
     classes.name = class extends HTMLElement {
         constructor() {
             super();
-            this.innerHTML = template;
+            let shadowRoot = this.attachShadow({ mode: "open" });
+            shadowRoot.innerHTML = template;
             new Vytic({
-                root: this,
+                root: shadowRoot.firstElementChild,
                 data,
                 methods
             });
