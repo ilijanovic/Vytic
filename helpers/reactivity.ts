@@ -1,5 +1,6 @@
-import { VirtualDomInterface } from "./parser";
-import { deleteElement, insertElement } from "./utils";
+import { Vytic } from "../vytic";
+import { parseHTML, VirtualDomInterface } from "./parser";
+import { deleteElement, insertElement, validHTML } from "./utils";
 
 export class Reactivity {
     vDom: VirtualDomInterface;
@@ -11,7 +12,6 @@ export class Reactivity {
         this.data = data
         this.methods = methods;
         this.updating = false
-
     }
 
     makeReactive() {
@@ -34,7 +34,7 @@ export class Reactivity {
 
                 if (!this.updating) {
                     this.updating = true
-                    await this.update(this.vDom, this.methods)
+                    await this.update(this.vDom, this.methods, this.components)
                     this.updating = false
                 }
                 return true;
@@ -52,6 +52,7 @@ export class Reactivity {
                 let classes = vDom.attributes.bindedClasses
                 if (once) {
                     vDom.element = document.createElement(vDom.tag)
+
                     if (showStat !== null) {
                         let value = !!parseString(showStat, this.data)
 
@@ -86,7 +87,6 @@ export class Reactivity {
                     if (value && !visible) {
                         vDom.attributes.visible = true
                         vDom.element = document.createElement(vDom.tag)
-                        console.log("inserted", vDom.element)
                         insertElement(vDom.element, vDom.attributes.parent, vDom.attributes.index)
                     }
                 }
@@ -98,15 +98,8 @@ export class Reactivity {
                     let value = parseString(stringVariable, this.data)
                     vDom.element.style.setProperty(style, value)
                 })
-                for (const child of vDom.children) {
-                    let childElement = await this.update(child, methods, once)
-                    if (once) {
-                        if (childElement !== null) {
-                            vDom.element.appendChild(childElement)
-                        }
 
-                    }
-                }
+
                 classes.forEach(([cl, value]) => {
                     let status = !!parseString(value, this.data)
                     if (status) {
@@ -115,6 +108,15 @@ export class Reactivity {
                         vDom.element.classList.remove(cl)
                     }
                 })
+                for (let child of vDom.children) {
+
+                    let childElement = await this.update(child, methods, once)
+                    if (once) {
+                        if (childElement !== null) {
+                            vDom.element.appendChild(childElement)
+                        }
+                    }
+                }
                 return res(vDom.element)
             })
 

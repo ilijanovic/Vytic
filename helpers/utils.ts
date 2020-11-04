@@ -76,4 +76,7 @@ export function insertElement(element: HTMLElement, parent: HTMLElement, index: 
 
     parent.insertBefore(element, parent.children[index]);
 }
+export function validHTML(element: HTMLElement | Element) {
+    return document.createElement(element.tagName.toUpperCase()).toString() != "[object HTMLUnknownElement]";
+}
 

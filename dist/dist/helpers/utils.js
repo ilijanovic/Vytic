@@ -62,6 +62,3 @@ export function deleteElement(element) {
 export function insertElement(element, parent, index = 0) {
     parent.insertBefore(element, parent.children[index]);
 }
-export function validHTML(element) {
-    return document.createElement(element.tagName.toUpperCase()).toString() != "[object HTMLUnknownElement]";
-}

@@ -1,56 +1,62 @@
 <!DOCTYPE html>
 <html lang="en">
 
-<body>
-    <div id="root">
-        <button @click="dec">Decrease counter: {{ counter }}</button>
 
-        <button @click="inc">Counter: {{ counter }}</button>
-        <p if="counter > 10">Test</p>
-        <p s:width="counter * 10 + 'px'" style="background: red; color: white">Double value:
-            {{ counter * 2 }}</p>
+<div id="root">
+    <p>hy</p>
+    <button @click="inc">counter: {{counter}}</button>
+  
+   
     </div>
-    <custom-button></custom-button>
-    <custom-button></custom-button>
-    <custom-button></custom-button>
-    <custom-button></custom-button>
+
+
+</div>
+<counter-button></counter-button>
+<counter-button></counter-button>
+
+<body>
+   
 
 </body>
 <script type="module">
-    import { Vytic, createWebComponent } from "./dist/vytic.js"
-    let vytic = new Vytic({
+    import { createWebComponent, Vytic } from "./dist/vytic.js"
+    new Vytic({
+        data: {counter: 0},
         root: document.getElementById("root"),
-        data: {
-            counter: 1,
-            show: true
-        },
         methods: {
             inc() {
-                this.counter++
-                this.show = !this.show
-            },
-            dec() {
-                this.counter--
+                    this.counter++
+             
             }
         }
     })
-
     createWebComponent({
-        name: "custom-button",
-        template: `
-            <div>
-                <button @click="inc">Counter: {{counter}}</button>
-            </div>
-        `,
+        name: "counter-button",
         data: {
             counter: 0
         },
+        template: `<button @click="inc">Counter: {{counter}}</button>`,
         methods: {
-            inc() {
+            inc(){
                 this.counter++
             }
-        }
+        },
+        style: `
+           button {
+              background: green;
+              padding: 10px;
+              color: white;
+              border-radius: 6px;
+              border: none;
+              margin: 10px;
+              cursor: pointer;
+           }
+        `
     })
+  
+    
+
+   
 </script>
 
 </html>

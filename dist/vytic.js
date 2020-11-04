@@ -1,33 +1,49 @@
 import { parseHTML } from "./helpers/parser.js";
 import { Reactivity } from "./helpers/reactivity.js";
+import { parseStringToElement } from "./helpers/utils.js";
 export class Vytic {
-    constructor({ root = null, data = {}, methods = {} }) {
+    constructor({ root = null, data = {}, methods = {}, appendTo }) {
         if (!root)
             throw "No root element passed";
+        let oldRoot = root;
         let vDom = parseHTML(root);
         let reactivity = new Reactivity(vDom, data, methods);
         reactivity.makeReactive();
         reactivity.update(reactivity.vDom, methods, true).then(rootElement => {
-            root.innerHTML = "";
+            oldRoot.innerHTML = "";
+            if (appendTo) {
+                appendTo.appendChild(rootElement);
+                return;
+            }
             Array.from(rootElement.children).forEach(child => {
-                root.appendChild(child);
+                if (appendTo) {
+                    appendTo.appendChild(child);
+                }
+                else {
+                    oldRoot.appendChild(child);
+                }
             });
         });
     }
 }
-export function createWebComponent({ name, template, data, methods }) {
+export function createWebComponent({ name, template, style = "", data = {}, methods = {}, components = {} }) {
     let classes = {
         name
     };
     classes.name = class extends HTMLElement {
         constructor() {
             super();
+            let el = parseStringToElement(template);
             let shadowRoot = this.attachShadow({ mode: "open" });
-            shadowRoot.innerHTML = template;
+            let st = document.createElement("style");
+            st.appendChild(document.createTextNode(style));
+            shadowRoot.appendChild(st);
             new Vytic({
-                root: shadowRoot.firstElementChild,
+                root: el,
                 data,
-                methods
+                methods,
+                components,
+                appendTo: shadowRoot
             });
         }
         ;

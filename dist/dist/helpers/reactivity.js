@@ -1,10 +1,12 @@
+import { parseHTML } from "./parser.js";
 import { deleteElement, insertElement } from "./utils.js";
 export class Reactivity {
-    constructor(vDom, data, methods) {
+    constructor(vDom, data, methods, components) {
         this.vDom = vDom;
         this.data = data;
         this.methods = methods;
         this.updating = false;
+        this.components = components;
     }
     makeReactive() {
         let reactiveData = new Proxy(this.data, this.proxyHandler());
@@ -30,9 +32,17 @@ export class Reactivity {
             }.bind(this),
         };
     }
-    update(vDom, methods, once = false) {
+    update(vDom, methods, components, once = false) {
         return new Promise(res => {
             requestAnimationFrame(async () => {
+                if (once) {
+                    for (let component in components) {
+                        if (component.toUpperCase() === vDom.tag) {
+                            vDom = parseHTML(components[component]);
+                            console.log(vDom);
+                        }
+                    }
+                }
                 let stylings = vDom.attributes.bindedStyle;
                 let handlers = vDom.attributes.handlers;
                 let attrs = vDom.attributes.attr;
@@ -79,12 +89,21 @@ export class Reactivity {
                 }
                 let parsedText = parseString(vDom.originalText, this.data);
                 if (parsedText !== vDom.text) {
+                    console.log(vDom);
                     vDom.element.textContent = parsedText;
                 }
                 stylings.forEach(([style, stringVariable]) => {
                     let value = parseString(stringVariable, this.data);
                     vDom.element.style.setProperty(style, value);
                 });
+                for (const child of vDom.children) {
+                    let childElement = await this.update(child, methods, components, once);
+                    if (once) {
+                        if (childElement !== null) {
+                            vDom.element.appendChild(childElement);
+                        }
+                    }
+                }
                 classes.forEach(([cl, value]) => {
                     let status = !!parseString(value, this.data);
                     if (status) {
@@ -94,14 +113,6 @@ export class Reactivity {
                         vDom.element.classList.remove(cl);
                     }
                 });
-                for (let child of vDom.children) {
-                    let childElement = await this.update(child, methods, once);
-                    if (once) {
-                        if (childElement !== null) {
-                            vDom.element.appendChild(childElement);
-                        }
-                    }
-                }
                 return res(vDom.element);
             });
         });
