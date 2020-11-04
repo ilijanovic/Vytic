@@ -62,7 +62,7 @@ export function formatText(text: String): string {
 }
 
 
-export function parseStringToElement(template: string): any {
+export function parseStringToElement(template: string): Element {
     let div = document.createElement("div")
     div.innerHTML = template
     return div.children[0]
