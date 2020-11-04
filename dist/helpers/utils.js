@@ -96,3 +96,11 @@ export function updateStylings(stylings, data, element) {
         element.style.setProperty(style, value);
     });
 }
+export function updateAttributes(attributes, data, element) {
+    attributes.forEach(([attr, value]) => {
+        let parsed = parseString(value, data);
+        if (value !== element.getAttribute(attr)) {
+            element.setAttribute(attr, parsed);
+        }
+    });
+}

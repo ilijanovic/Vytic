@@ -1,6 +1,6 @@
 "use strict";
 exports.__esModule = true;
-exports.updateStylings = exports.updateClasses = exports.addAttributes = exports.addHandlers = exports.nextTick = exports.validHTML = exports.insertElement = exports.deleteElement = exports.parseStringToElement = exports.formatText = exports.collectAttributes = void 0;
+exports.updateAttributes = exports.updateStylings = exports.updateClasses = exports.addAttributes = exports.addHandlers = exports.nextTick = exports.validHTML = exports.insertElement = exports.deleteElement = exports.parseStringToElement = exports.formatText = exports.collectAttributes = void 0;
 var reactivity_1 = require("./reactivity");
 function collectAttributes(element) {
     return Array.from(element.attributes, function (_a) {
@@ -119,3 +119,13 @@ function updateStylings(stylings, data, element) {
     });
 }
 exports.updateStylings = updateStylings;
+function updateAttributes(attributes, data, element) {
+    attributes.forEach(function (_a) {
+        var attr = _a[0], value = _a[1];
+        var parsed = reactivity_1.parseString(value, data);
+        if (value !== element.getAttribute(attr)) {
+            element.setAttribute(attr, parsed);
+        }
+    });
+}
+exports.updateAttributes = updateAttributes;

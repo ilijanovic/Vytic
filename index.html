@@ -6,7 +6,7 @@
         <button @click="toggle">Toggle</button>
         <button @click="inc">Counter: {{count}}</button>
         <green-button if="visible"></green-button>
-
+        <img a:src="path" />
     </div>
 </body>
 <script type="module">
@@ -15,11 +15,13 @@
         root: document.getElementById("root"),
         data: {
             count: 0,
-            visible: false
+            visible: false,
+            path: "https://cdn.pixabay.com/photo/2020/04/04/20/00/sea-bird-5003667_1280.jpg"
         },
         methods: {
             inc() {
                 this.count++
+
             },
             toggle() {
                 this.visible = !this.visible

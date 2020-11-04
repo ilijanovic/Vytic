@@ -112,3 +112,12 @@ export function updateStylings(stylings: string[][], data: Object, element: HTML
         element.style.setProperty(style, value)
     })
 }
+
+export function updateAttributes(attributes: string[][], data: Object, element: Element): void {
+    attributes.forEach(([attr, value]) => {
+        let parsed = parseString(value, data)
+        if (value !== element.getAttribute(attr)) {
+            element.setAttribute(attr, parsed)
+        }
+    })
+}

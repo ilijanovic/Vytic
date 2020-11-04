@@ -87,6 +87,7 @@ var Reactivity = /** @class */ (function () {
         var showStat = vDom.attributes.show;
         var visible = vDom.attributes.visible;
         var classes = vDom.attributes.bindedClasses;
+        var bindedAttrs = vDom.attributes.bindedAttr;
         if (once) {
             vDom.element = document.createElement(vDom.tag);
             if (showStat !== null) {
@@ -120,6 +121,7 @@ var Reactivity = /** @class */ (function () {
         }
         utils_1.updateStylings(stylings, this.data, vDom.element);
         utils_1.updateClasses(classes, this.data, vDom.element);
+        utils_1.updateAttributes(bindedAttrs, this.data, vDom.element);
         for (var _i = 0, _a = vDom.children; _i < _a.length; _i++) {
             var child = _a[_i];
             var childElement = this.update(child, methods, once);

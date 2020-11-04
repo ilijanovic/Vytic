@@ -1,6 +1,6 @@
 
 import { VirtualDomInterface } from "./parser";
-import { addAttributes, addHandlers, deleteElement, insertElement, nextTick, updateClasses, updateStylings } from "./utils";
+import { addAttributes, addHandlers, deleteElement, insertElement, nextTick, updateAttributes, updateClasses, updateStylings } from "./utils";
 
 export class Reactivity {
     vDom: VirtualDomInterface;
@@ -50,6 +50,7 @@ export class Reactivity {
         let showStat = vDom.attributes.show
         let visible = vDom.attributes.visible
         let classes = vDom.attributes.bindedClasses
+        let bindedAttrs = vDom.attributes.bindedAttr
         if (once) {
             vDom.element = document.createElement(vDom.tag)
 
@@ -86,7 +87,7 @@ export class Reactivity {
 
         updateStylings(stylings, this.data, vDom.element)
         updateClasses(classes, this.data, vDom.element)
-
+        updateAttributes(bindedAttrs, this.data, vDom.element)
         for (let child of vDom.children) {
 
             let childElement = this.update(child, methods, once)

@@ -1,4 +1,4 @@
-import { addAttributes, addHandlers, deleteElement, insertElement, nextTick, updateClasses, updateStylings } from "./utils.js";
+import { addAttributes, addHandlers, deleteElement, insertElement, nextTick, updateAttributes, updateClasses, updateStylings } from "./utils.js";
 export class Reactivity {
     constructor(vDom, data, methods) {
         this.vDom = vDom;
@@ -38,6 +38,7 @@ export class Reactivity {
         let showStat = vDom.attributes.show;
         let visible = vDom.attributes.visible;
         let classes = vDom.attributes.bindedClasses;
+        let bindedAttrs = vDom.attributes.bindedAttr;
         if (once) {
             vDom.element = document.createElement(vDom.tag);
             if (showStat !== null) {
@@ -71,6 +72,7 @@ export class Reactivity {
         }
         updateStylings(stylings, this.data, vDom.element);
         updateClasses(classes, this.data, vDom.element);
+        updateAttributes(bindedAttrs, this.data, vDom.element);
         for (let child of vDom.children) {
             let childElement = this.update(child, methods, once);
             if (once) {
