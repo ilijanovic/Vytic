@@ -1,3 +1,4 @@
+import { parseString } from "./reactivity.js";
 export function collectAttributes(element) {
     return Array.from(element.attributes, ({ name, value }) => [
         name,
@@ -64,4 +65,34 @@ export function insertElement(element, parent, index = 0) {
 }
 export function validHTML(element) {
     return document.createElement(element.tagName.toUpperCase()).toString() != "[object HTMLUnknownElement]";
+}
+export function nextTick() {
+    return new Promise(res => requestAnimationFrame(res));
+}
+export function addHandlers(handlers, methods, element) {
+    handlers.forEach(([handler, method]) => {
+        element.addEventListener(handler, methods[method]);
+    });
+}
+export function addAttributes(attributes, element) {
+    attributes.forEach(([attribute, value]) => {
+        element.setAttribute(attribute, value);
+    });
+}
+export function updateClasses(classes, data, element) {
+    classes.forEach(([cl, value]) => {
+        let status = !!parseString(value, data);
+        if (status) {
+            element.classList.add(cl);
+        }
+        else {
+            element.classList.remove(cl);
+        }
+    });
+}
+export function updateStylings(stylings, data, element) {
+    stylings.forEach(([style, stringVariable]) => {
+        let value = parseString(stringVariable, data);
+        element.style.setProperty(style, value);
+    });
 }

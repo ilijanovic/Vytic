@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "ttsc --p tsconfig.json"
+    "build": "ttsc --p tsconfig.json"
   },
   "watch": [
     "vytic"

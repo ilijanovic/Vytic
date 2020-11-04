@@ -12,21 +12,21 @@ export class Vytic {
         let vDom = parseHTML(root)
         let reactivity = new Reactivity(vDom, data, methods)
         reactivity.makeReactive()
-        reactivity.update(reactivity.vDom, methods, true).then(rootElement => {
-            oldRoot.innerHTML = "";
+        let rootElement = reactivity.update(reactivity.vDom, methods, true)
+        oldRoot.innerHTML = "";
+        if (appendTo) {
+            appendTo.appendChild(rootElement);
+            return
+        }
+        Array.from(rootElement.children).forEach(child => {
             if (appendTo) {
-                appendTo.appendChild(rootElement);
-                return
+                appendTo.appendChild(child)
+            } else {
+                oldRoot.appendChild(child)
             }
-            Array.from(rootElement.children).forEach(child => {
-                if (appendTo) {
-                    appendTo.appendChild(child)
-                } else {
-                    oldRoot.appendChild(child)
-                }
 
-            })
         })
+
     }
 }
 interface ComponentInterface {
@@ -34,17 +34,15 @@ interface ComponentInterface {
     data: Object,
     template: string,
     methods: MethodsInterface,
-    components: Object,
     style: string
 }
 interface InputProps {
     root: any,
     data: Object,
     methods: MethodsInterface,
-    components: Object,
     appendTo: any
 }
-export function createWebComponent({ name, template, style = "", data = {}, methods = {}, components = {} }: ComponentInterface) {
+export function createWebComponent({ name, template, style = "", data = {}, methods = {} }: ComponentInterface) {
     let classes: { [key: string]: any } = {
         name
     }
@@ -61,7 +59,6 @@ export function createWebComponent({ name, template, style = "", data = {}, meth
                 root: el,
                 data: { ...data },
                 methods: { ...methods },
-                components,
                 appendTo: shadowRoot
             })
         };

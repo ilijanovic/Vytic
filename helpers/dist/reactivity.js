@@ -66,9 +66,10 @@ var Reactivity = /** @class */ (function () {
                                 obj[prop] = newVal;
                                 if (!!this.updating) return [3 /*break*/, 2];
                                 this.updating = true;
-                                return [4 /*yield*/, this.update(this.vDom, this.methods)];
+                                return [4 /*yield*/, utils_1.nextTick()];
                             case 1:
                                 _a.sent();
+                                this.update(this.vDom, this.methods, this.components);
                                 this.updating = false;
                                 _a.label = 2;
                             case 2: return [2 /*return*/, true];
@@ -79,105 +80,56 @@ var Reactivity = /** @class */ (function () {
         };
     };
     Reactivity.prototype.update = function (vDom, methods, once) {
-        var _this = this;
         if (once === void 0) { once = false; }
-        return new Promise(function (res) {
-            requestAnimationFrame(function () { return __awaiter(_this, void 0, void 0, function () {
-                var stylings, handlers, attrs, showStat, visible, classes, value, value, parsedText, _i, _a, child, childElement;
-                var _this = this;
-                return __generator(this, function (_b) {
-                    switch (_b.label) {
-                        case 0:
-                            stylings = vDom.attributes.bindedStyle;
-                            handlers = vDom.attributes.handlers;
-                            attrs = vDom.attributes.attr;
-                            showStat = vDom.attributes.show;
-                            visible = vDom.attributes.visible;
-                            classes = vDom.attributes.bindedClasses;
-                            if (once) {
-                                vDom.element = document.createElement(vDom.tag);
-                                if (showStat !== null) {
-                                    value = !!parseString(showStat, this.data);
-                                    if (!value) {
-                                        vDom.attributes.visible = false;
-                                        return [2 /*return*/, res(null)];
-                                    }
-                                }
-                                handlers.forEach(function (_a) {
-                                    var handler = _a[0], method = _a[1];
-                                    vDom.element.addEventListener(handler, methods[method]);
-                                });
-                                attrs.forEach(function (_a) {
-                                    var attribute = _a[0], value = _a[1];
-                                    vDom.element.setAttribute(attribute, value);
-                                });
-                                classes.forEach(function (_a) {
-                                    var cl = _a[0], value = _a[1];
-                                    var status = !!parseString(value, _this.data);
-                                    if (status) {
-                                        vDom.element.classList.add(cl);
-                                    }
-                                    else {
-                                        vDom.element.classList.remove(cl);
-                                    }
-                                });
-                            }
-                            if (showStat !== null) {
-                                value = !!parseString(showStat, this.data);
-                                if (!value && visible) {
-                                    utils_1.deleteElement(vDom.element);
-                                    vDom.attributes.visible = false;
-                                    return [2 /*return*/, res()];
-                                }
-                                if (value && !visible) {
-                                    vDom.attributes.visible = true;
-                                    vDom.element = document.createElement(vDom.tag);
-                                    console.log("inserted", vDom.element);
-                                    utils_1.insertElement(vDom.element, vDom.attributes.parent, vDom.attributes.index);
-                                }
-                            }
-                            parsedText = parseString(vDom.originalText, this.data);
-                            if (parsedText !== vDom.text) {
-                                vDom.element.textContent = parsedText;
-                            }
-                            stylings.forEach(function (_a) {
-                                var style = _a[0], stringVariable = _a[1];
-                                var value = parseString(stringVariable, _this.data);
-                                vDom.element.style.setProperty(style, value);
-                            });
-                            _i = 0, _a = vDom.children;
-                            _b.label = 1;
-                        case 1:
-                            if (!(_i < _a.length)) return [3 /*break*/, 4];
-                            child = _a[_i];
-                            return [4 /*yield*/, this.update(child, methods, once)];
-                        case 2:
-                            childElement = _b.sent();
-                            if (once) {
-                                if (childElement !== null) {
-                                    vDom.element.appendChild(childElement);
-                                }
-                            }
-                            _b.label = 3;
-                        case 3:
-                            _i++;
-                            return [3 /*break*/, 1];
-                        case 4:
-                            classes.forEach(function (_a) {
-                                var cl = _a[0], value = _a[1];
-                                var status = !!parseString(value, _this.data);
-                                if (status) {
-                                    vDom.element.classList.add(cl);
-                                }
-                                else {
-                                    vDom.element.classList.remove(cl);
-                                }
-                            });
-                            return [2 /*return*/, res(vDom.element)];
-                    }
-                });
-            }); });
-        });
+        var stylings = vDom.attributes.bindedStyle;
+        var handlers = vDom.attributes.handlers;
+        var attrs = vDom.attributes.attr;
+        var showStat = vDom.attributes.show;
+        var visible = vDom.attributes.visible;
+        var classes = vDom.attributes.bindedClasses;
+        if (once) {
+            vDom.element = document.createElement(vDom.tag);
+            if (showStat !== null) {
+                var value = !!parseString(showStat, this.data);
+                if (!value) {
+                    vDom.attributes.visible = false;
+                    return null;
+                }
+            }
+            utils_1.addHandlers(handlers, methods, vDom.element);
+            utils_1.addAttributes(attrs, vDom.element);
+            utils_1.updateClasses(classes, this.data, vDom.element);
+        }
+        if (showStat !== null) {
+            var value = !!parseString(showStat, this.data);
+            if (!value && visible) {
+                utils_1.deleteElement(vDom.element);
+                vDom.attributes.visible = false;
+                return;
+            }
+            if (value && !visible) {
+                vDom.attributes.visible = true;
+                vDom.element = document.createElement(vDom.tag);
+                utils_1.addHandlers(handlers, methods, vDom.element);
+                utils_1.insertElement(vDom.element, vDom.attributes.parent, vDom.attributes.index);
+            }
+        }
+        var parsedText = parseString(vDom.originalText, this.data);
+        if (parsedText !== vDom.text) {
+            vDom.element.textContent = parsedText;
+        }
+        utils_1.updateStylings(stylings, this.data, vDom.element);
+        utils_1.updateClasses(classes, this.data, vDom.element);
+        for (var _i = 0, _a = vDom.children; _i < _a.length; _i++) {
+            var child = _a[_i];
+            var childElement = this.update(child, methods, once);
+            if (once) {
+                if (childElement !== null) {
+                    vDom.element.appendChild(childElement);
+                }
+            }
+        }
+        return vDom.element;
     };
     return Reactivity;
 }());

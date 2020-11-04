@@ -1,6 +1,7 @@
 "use strict";
 exports.__esModule = true;
-exports.insertElement = exports.deleteElement = exports.parseStringToElement = exports.formatText = exports.collectAttributes = void 0;
+exports.updateStylings = exports.updateClasses = exports.addAttributes = exports.addHandlers = exports.nextTick = exports.validHTML = exports.insertElement = exports.deleteElement = exports.parseStringToElement = exports.formatText = exports.collectAttributes = void 0;
+var reactivity_1 = require("./reactivity");
 function collectAttributes(element) {
     return Array.from(element.attributes, function (_a) {
         var name = _a.name, value = _a.value;
@@ -75,3 +76,46 @@ function insertElement(element, parent, index) {
     parent.insertBefore(element, parent.children[index]);
 }
 exports.insertElement = insertElement;
+function validHTML(element) {
+    return document.createElement(element.tagName.toUpperCase()).toString() != "[object HTMLUnknownElement]";
+}
+exports.validHTML = validHTML;
+function nextTick() {
+    return new Promise(function (res) { return requestAnimationFrame(res); });
+}
+exports.nextTick = nextTick;
+function addHandlers(handlers, methods, element) {
+    handlers.forEach(function (_a) {
+        var handler = _a[0], method = _a[1];
+        element.addEventListener(handler, methods[method]);
+    });
+}
+exports.addHandlers = addHandlers;
+function addAttributes(attributes, element) {
+    attributes.forEach(function (_a) {
+        var attribute = _a[0], value = _a[1];
+        element.setAttribute(attribute, value);
+    });
+}
+exports.addAttributes = addAttributes;
+function updateClasses(classes, data, element) {
+    classes.forEach(function (_a) {
+        var cl = _a[0], value = _a[1];
+        var status = !!reactivity_1.parseString(value, data);
+        if (status) {
+            element.classList.add(cl);
+        }
+        else {
+            element.classList.remove(cl);
+        }
+    });
+}
+exports.updateClasses = updateClasses;
+function updateStylings(stylings, data, element) {
+    stylings.forEach(function (_a) {
+        var style = _a[0], stringVariable = _a[1];
+        var value = reactivity_1.parseString(stringVariable, data);
+        element.style.setProperty(style, value);
+    });
+}
+exports.updateStylings = updateStylings;

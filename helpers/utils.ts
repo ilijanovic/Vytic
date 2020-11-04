@@ -1,3 +1,4 @@
+import { MethodsInterface, parseString } from "./reactivity"
 
 export function collectAttributes(element: HTMLElement | Element): AttributesInterface {
     return Array.from(element.attributes, ({ name, value }) => [
@@ -76,7 +77,38 @@ export function insertElement(element: HTMLElement, parent: HTMLElement, index: 
 
     parent.insertBefore(element, parent.children[index]);
 }
-export function validHTML(element: HTMLElement | Element) {
+export function validHTML(element: HTMLElement | Element): Boolean {
     return document.createElement(element.tagName.toUpperCase()).toString() != "[object HTMLUnknownElement]";
 }
 
+export function nextTick(): Promise<any> {
+    return new Promise(res => requestAnimationFrame(res))
+}
+
+export function addHandlers(handlers: string[][], methods: MethodsInterface, element: Element): void {
+    handlers.forEach(([handler, method]) => {
+        element.addEventListener(handler, methods[method])
+    })
+}
+
+export function addAttributes(attributes: string[][], element: Element): void {
+    attributes.forEach(([attribute, value]) => {
+        element.setAttribute(attribute, value)
+    })
+}
+export function updateClasses(classes: string[][], data: Object, element: Element): void {
+    classes.forEach(([cl, value]) => {
+        let status = !!parseString(value, data)
+        if (status) {
+            element.classList.add(cl)
+        } else {
+            element.classList.remove(cl)
+        }
+    })
+}
+export function updateStylings(stylings: string[][], data: Object, element: HTMLElement): void {
+    stylings.forEach(([style, stringVariable]) => {
+        let value = parseString(stringVariable, data)
+        element.style.setProperty(style, value)
+    })
+}

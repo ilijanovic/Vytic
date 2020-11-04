@@ -1,78 +1,56 @@
 <!DOCTYPE html>
 <html lang="en">
 
-
-<div id="root">
-    <p>hy</p>
-    <button @click="inc">counter: {{counter}}</button>
-    <counter-button if="visible"></counter-button>
-    <counter-button if="!visible"></counter-button>
-    <counter-button if="visible"></counter-button>
-    <counter-button if="!visible"></counter-button>
-    <counter-button if="visible"></counter-button>
-    </div>
-
-
-</div>
-
-
 <body>
-   
+    <div id="root">
+        <button @click="toggle">Counter: {{count}}</button>
+        <green-button if="visible"></green-button>
 
+    </div>
 </body>
 <script type="module">
-    import { createWebComponent, Vytic } from "./dist/vytic.js"
+    import { Vytic, createWebComponent } from "./dist/vytic.js";
     new Vytic({
-        data: {
-            counter: 0,
-            visible: true
-        },
         root: document.getElementById("root"),
+        data: {
+            count: 0,
+            visible: false
+        },
         methods: {
             inc() {
-                    this.counter++
-                    this.visible = !this.visible;
+                this.count++
+            },
+            toggle() {
+                this.visible = !this.visible
             }
         }
     })
+
     createWebComponent({
-        name: "counter-button",
-        data: {
-            counter: 0
-        },
-        template: `
-        <div>
-            <slot></slot>
-            <button @click="inc">Counter: {{counter}}</button>
-        </div>
+        name: "green-button",
+        template: `<button @click="inc">Click me! {{counter}}</button>`,
+        style: `
+            button {
+                background: green;
+                border-radius: 6px;
+                color: white;
+                padding: 10px;
+                border: none;
+            }
         `,
         methods: {
-            inc(){
+            inc() {
                 this.counter++
             }
         },
-        style: `
-           button {
-              background: green;
-              padding: 10px;
-              color: white;
-              border-radius: 6px;
-              border: none;
-              margin: 10px;
-              cursor: pointer;
-           }
-        `
+        data: {
+            counter: 0
+        }
     })
-  
-    
 
-   
+
 </script>
 
 </html>
 
-<style>
-    .box {
-        background: red
-    }
-</style>
+<style></style>
