@@ -41,7 +41,7 @@ export function createWebComponent({ name, template, style = "", data = {}, meth
             new Vytic({
                 root: el,
                 data: { ...data },
-                methods,
+                methods: { ...methods },
                 components,
                 appendTo: shadowRoot
             });
