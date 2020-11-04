@@ -2,7 +2,7 @@
 
 Super small reactive framework build with typescript.
 
-## How to run it 
+## How to run it
 
 Install dependencies:
 
@@ -43,11 +43,11 @@ Example:
     data: {
        added: true
     }
-    
+
     <style>
     .boxclass {  background: red }
     </style>
-    
+
 ### Attributes binding
 
 You can bind attributes with "a:"
@@ -56,10 +56,32 @@ You can bind attributes with "a:"
 
 Example
 
-
     <img a:src="path" />
 
 
     data: {
         path: "https://cdn.pixabay.com/photo/2020/04/04/20/00/sea-bird-5003667_1280.jpg"
     }
+
+## Toggle visibility
+
+You can use the "if" directive for toggeling elements.
+
+    <button @click="toggle">Toggle</button>
+
+    <div if="visible">Toggle me</div>
+
+    data: {
+        visible: true
+    },
+    methods: {
+        toggle(){
+            this.visible = !this.visible
+        }
+    }
+
+## Event handlers
+
+You can attach event handlers with `@` and then the event name.
+
+Example: `@click`
