@@ -1,18 +1,14 @@
-import { createWebComponent } from "../dist/vytic.js";
+import { component } from "../dist/vytic.js";
 
-createWebComponent({
-  name: "super-button",
-  data: {
-    counter: 0,
-  },
-  template: `
-  <div>
-    <button @click="inc">Increase counter: {{counter}}</button>
-  </div>
-  `,
+export default component({
+  root: `<button @click="inc">Counter: {{counter}}</button>`,
   methods: {
     inc() {
       this.counter++;
+      console.log(this);
     },
+  },
+  data: {
+    counter: 0,
   },
 });

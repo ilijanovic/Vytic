@@ -1,6 +1,6 @@
 import { parseHTML } from "./helpers/parser.js";
 import { Reactivity } from "./helpers/reactivity.js";
-import { parseStringToElement } from "./helpers/utils.js";
+import { parseStringToElement, nextTick, objectKeysToUppercase, looseRef } from "./helpers/utils.js";
 /**
  * Creates a new Vytic instance
  * Compiles the HTML markup down to an virtual DOM. It parses the DOM an replaces it with the root element
@@ -11,29 +11,41 @@ import { parseStringToElement } from "./helpers/utils.js";
  * @param {Object} methods - Methods to mutate data
  * @param {ShadowRoot | HTMLElement | Element} appendTo - Instead of replacing the root element with the parsed element, the element will be appended instead on the "appendAt" element
  */
-export class Vytic {
-    constructor({ root = null, data = {}, methods = {}, appendTo }) {
-        if (!root)
+class Vytic {
+    constructor({ root = null, data = {}, methods = {}, appendTo, ready, components = {} }) {
+        if (typeof root === "string") {
+            root = parseStringToElement(root);
+        }
+        else if (!root) {
             throw "No root element passed";
+        }
+        components = objectKeysToUppercase(components);
+        methods = looseRef(methods);
         let oldRoot = root;
         let vDom = parseHTML(root);
-        let reactivity = new Reactivity(vDom, data, methods);
-        reactivity.makeReactive();
-        let rootElement = reactivity.update(reactivity.vDom, methods, true);
+        let reactivity = new Reactivity(vDom, data, methods, components);
+        let heap = reactivity.makeReactive();
+        let rootElement = reactivity.update(reactivity.vDom, methods, components, true);
         oldRoot.innerHTML = "";
+        if (typeof ready === "function") {
+            ready.call(heap);
+        }
         if (appendTo) {
+            this.root = appendTo;
             appendTo.appendChild(rootElement);
             return;
         }
+        this.root = rootElement;
         Array.from(rootElement.children).forEach(child => {
-            if (appendTo) {
-                appendTo.appendChild(child);
-            }
-            else {
-                oldRoot.appendChild(child);
-            }
+            oldRoot.appendChild(child);
         });
     }
+    getReactiveElement() {
+        return this.root;
+    }
+}
+export function component(component) {
+    return component;
 }
 /**
  * Creates a native web component with reactivity from Vytic
@@ -46,7 +58,7 @@ export class Vytic {
  * @param {Object} methods - Contains methods for mutating data
  * @returns {ShadowRoot} - Returns the reactive shadow element
  */
-export function createWebComponent({ name, template, style = "", data = {}, methods = {} }) {
+function createWebComponent({ name, template, style = "", data = {}, methods = {} }) {
     let classes = {
         name
     };
@@ -71,3 +83,4 @@ export function createWebComponent({ name, template, style = "", data = {}, meth
     window.customElements.define(name, classes[name]);
     return classes[name].shadow;
 }
+export { Vytic, createWebComponent, nextTick };

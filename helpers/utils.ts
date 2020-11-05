@@ -1,4 +1,5 @@
-import { MethodsInterface, parseString } from "./reactivity"
+
+import { ComponentType, MethodsInterface, parseString } from "./reactivity"
 
 /**
  * Collects all attributes from an element.
@@ -93,6 +94,7 @@ export function parseStringToElement(template: string): Element {
  */
 export function deleteElement(element: HTMLElement): void {
     let parent = element.parentNode;
+    console.log(element.parentNode)
     parent.removeChild(element)
 }
 
@@ -186,4 +188,22 @@ export function updateAttributes(attributes: string[][], data: Object, element: 
             element.setAttribute(attr, parsed)
         }
     })
+}
+
+export function objectKeysToUppercase(components: ComponentType) {
+    let newObj: ComponentType = {};
+    for (let key in components) {
+        let newKey = key.toUpperCase();
+        newObj[newKey] = components[key];
+    }
+    return newObj;
+}
+
+/**
+ * Copyies the object. It loses the reference to the original one.
+ * 
+ * @param {Object} obj - Object with methods
+ */
+export function looseRef(obj: Object): Object {
+    return { ...obj }
 }

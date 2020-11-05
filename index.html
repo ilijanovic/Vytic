@@ -1,47 +1,35 @@
 <!DOCTYPE html>
 <html lang="en">
-    <body>
-        <div id="root">
-            <button style="display: block;" @click="toggle">Toggle</button>
-            <custom-button if="!visible"></custom-button>
-        </div>
-    </body>
-    <script type="module">
-        import { Vytic, createWebComponent } from "./dist/vytic.js";
-        new Vytic({
-            root: document.getElementById("root"),
-            methods: {
-                toggle(){
-                    this.visible = !this.visible
-                }
-            },
-            data: {
-                visible: true
-            }
-        })
-        createWebComponent({
-            name: "custom-button",
-            template: `<button @click="increase">{{count}}</button>`,
-            style: `
-                button {
-                    background: green;
-                    color: white;
-                    padding: 20px;
-                    cursor: pointer;
-                    border: none;
-                }
-            `,
-            methods: {
-                increase(){
-                    this.count++
-                }
-            },
-            data: {
-                count: 0, 
-            }
-        })
-    </script>
-    <style>
-
-    </style>
+  <body>
+    <div id="root">
+      <buttn if="!visible"></buttn>
+      <buttn></buttn>
+      <button style="display: block;" @click="toggle">Start</button>
+      <buttn></buttn>
+    </div>
+  </body>
+  <script type="module">
+    import { Vytic } from "./dist/vytic.js";
+    import buttn from "./components/button.js";
+    new Vytic({
+      root: document.getElementById("root"),
+      methods: {
+        toggle() {
+          this.visible = !this.visible;
+        },
+      },
+      data: {
+        visible: false,
+        count: true,
+      },
+      components: {
+        buttn,
+      },
+    });
+  </script>
+  <style>
+    div {
+      transition: 300ms;
+    }
+  </style>
 </html>

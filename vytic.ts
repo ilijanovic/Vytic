@@ -1,7 +1,8 @@
 
 import { parseHTML } from "./helpers/parser"
-import { Reactivity, MethodsInterface } from "./helpers/reactivity"
-import { parseStringToElement } from "./helpers/utils";
+import { Reactivity, MethodsInterface, ComponentType } from "./helpers/reactivity"
+import { parseStringToElement, nextTick, objectKeysToUppercase, looseRef } from "./helpers/utils";
+
 
 /**
  * Creates a new Vytic instance
@@ -13,43 +14,66 @@ import { parseStringToElement } from "./helpers/utils";
  * @param {Object} methods - Methods to mutate data
  * @param {ShadowRoot | HTMLElement | Element} appendTo - Instead of replacing the root element with the parsed element, the element will be appended instead on the "appendAt" element
  */
-export class Vytic {
-    rootElement: Element;
-    constructor({ root = null, data = {}, methods = {}, appendTo }: InputProps) {
-        if (!root) throw "No root element passed"
+class Vytic {
+    root: Element | ShadowRoot
+    constructor({ root = null, data = {}, methods = {}, appendTo, ready, components = {} }: InputProps) {
+        if (typeof root === "string") {
+            root = parseStringToElement(root)
+        } else if (!root) {
+            throw "No root element passed"
+        }
+        components = objectKeysToUppercase(components)
+        methods = looseRef(methods)
         let oldRoot = root;
         let vDom = parseHTML(root)
-        let reactivity = new Reactivity(vDom, data, methods)
-        reactivity.makeReactive()
-        let rootElement = reactivity.update(reactivity.vDom, methods, true)
+        let reactivity = new Reactivity(vDom, data, methods, components)
+        let heap = reactivity.makeReactive()
+        let rootElement = reactivity.update(reactivity.vDom, methods, components, true)
         oldRoot.innerHTML = "";
+        if (typeof ready === "function") {
+            ready.call(heap)
+        }
         if (appendTo) {
+            this.root = appendTo
             appendTo.appendChild(rootElement);
             return
         }
+        this.root = rootElement
         Array.from(rootElement.children).forEach(child => {
-            if (appendTo) {
-                appendTo.appendChild(child)
-            } else {
-                oldRoot.appendChild(child)
-            }
-
+            oldRoot.appendChild(child)
         })
 
     }
+
+    public getReactiveElement(): any {
+        return this.root
+    }
 }
-interface ComponentInterface {
+export function component(component: ComponentInterface) {
+    return component
+}
+
+export interface WebComponentInterface {
     name: string,
     data: Object,
     template: string,
     methods: MethodsInterface,
-    style: string
+    style: string,
 }
-interface InputProps {
+export interface ComponentInterface {
+    data: Object,
+    root: Element,
+    methods: MethodsInterface,
+    ready?: Function,
+    components?: ComponentType
+}
+export interface InputProps {
     root: Element,
     data: Object,
     methods: MethodsInterface,
-    appendTo: Element | ShadowRoot | HTMLElement
+    appendTo?: Element | ShadowRoot | HTMLElement,
+    ready?: Function,
+    components?: ComponentType
 }
 
 /**
@@ -63,7 +87,7 @@ interface InputProps {
  * @param {Object} methods - Contains methods for mutating data
  * @returns {ShadowRoot} - Returns the reactive shadow element
  */
-export function createWebComponent({ name, template, style = "", data = {}, methods = {} }: ComponentInterface): ShadowRoot {
+function createWebComponent({ name, template, style = "", data = {}, methods = {} }: WebComponentInterface): ShadowRoot {
     let classes: { [key: string]: any } = {
         name
     }
@@ -88,6 +112,12 @@ export function createWebComponent({ name, template, style = "", data = {}, meth
     }
     window.customElements.define(name, classes[name]);
     return classes[name].shadow
+}
+
+export {
+    Vytic,
+    createWebComponent,
+    nextTick
 }
 
 

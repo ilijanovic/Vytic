@@ -81,6 +81,7 @@ export function parseStringToElement(template) {
  */
 export function deleteElement(element) {
     let parent = element.parentNode;
+    console.log(element.parentNode);
     parent.removeChild(element);
 }
 /**
@@ -170,4 +171,20 @@ export function updateAttributes(attributes, data, element) {
             element.setAttribute(attr, parsed);
         }
     });
+}
+export function objectKeysToUppercase(components) {
+    let newObj = {};
+    for (let key in components) {
+        let newKey = key.toUpperCase();
+        newObj[newKey] = components[key];
+    }
+    return newObj;
+}
+/**
+ * Copyies the object. It loses the reference to the original one.
+ *
+ * @param {Object} obj - Object with methods
+ */
+export function looseRef(obj) {
+    return Object.assign({}, obj);
 }
