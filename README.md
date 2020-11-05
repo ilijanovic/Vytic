@@ -1,6 +1,6 @@
 # Vytic
 
-Super small reactive framework build with typescript.
+Super small reactive framework build with typescript. It compiles the HTML markup down to an virtual DOM and tracks it for changes.
 
 ## How to run it
 
@@ -11,6 +11,32 @@ Install dependencies:
 Compile to javascript:
 
 `npm run build`
+
+## Setup
+
+The setup is following. Similar to vue:
+
+    <body>
+        <div id="root">
+            <button @click="inc">Counter: {{count}}</button>
+        </div>
+    </body>
+    <script type="module">
+        import { Vytic } from "./dist/vytic.js";
+        new Vytic({
+            root: document.getElementById("root"),
+            data: {
+                count: 0,
+            },
+            methods: {
+                inc() {
+                    this.count++
+                },
+            }
+        })
+
+
+    </script>
 
 ## Bindings
 
