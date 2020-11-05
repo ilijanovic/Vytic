@@ -116,6 +116,8 @@ Example: `@click`
 Vytic provides `createWebComponent` function that creates an reactive native web component.
 The difference between the example above and here is that you need `name` and you can add CSS styling to it witch is automatically scoped.
 
+Because they are native components you dont need to wrap them inside an root element.
+
     <body>
         <custom-button></custom-button>
     </body>
