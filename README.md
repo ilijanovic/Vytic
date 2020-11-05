@@ -34,8 +34,6 @@ The setup is following. Similar to vue:
                 },
             }
         })
-
-
     </script>
 
 ## Bindings
@@ -111,3 +109,36 @@ You can use the "if" directive for toggeling elements.
 You can attach event handlers with `@` and then the event name.
 
 Example: `@click`
+
+
+## Create native web components
+
+Vytic provides `createWebComponent` function that creates an reactive native web component.
+The difference between the example above and here is that you need `name` and you can add CSS styling to it witch is automatically scoped.
+
+    <body>
+        <custom-button></custom-button>
+    </body>
+    <script type="module">
+        import { createWebComponent } from "./dist/vytic.js";
+        createWebComponent({
+            name: "custom-button",
+            template: `
+                <button @click="inc">Counter: {{count}}</button>
+            `,
+            style: `
+                button {
+                    background: green;
+                    color: white;
+                }
+            `,
+            methods: {
+                inc(){
+                    this.count++
+                }
+            },
+            data: {
+                count:0
+            }
+        })
+    </script>
