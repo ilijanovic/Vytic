@@ -3,9 +3,18 @@ import { parseHTML } from "./helpers/parser"
 import { Reactivity, MethodsInterface } from "./helpers/reactivity"
 import { parseStringToElement } from "./helpers/utils";
 
-
+/**
+ * Creates a new Vytic instance
+ * Compiles the HTML markup down to an virtual DOM. It parses the DOM an replaces it with the root element
+ * 
+ * @constructor
+ * @param {Element} root - The root element that will be reactive later
+ * @param {Object} data - Objects that holds data. Will be replaced by an proxy object to track changes
+ * @param {Object} methods - Methods to mutate data
+ * @param {ShadowRoot | HTMLElement | Element} appendTo - Instead of replacing the root element with the parsed element, the element will be appended instead on the "appendAt" element
+ */
 export class Vytic {
-    rootElement: HTMLElement | Element;
+    rootElement: Element;
     constructor({ root = null, data = {}, methods = {}, appendTo }: InputProps) {
         if (!root) throw "No root element passed"
         let oldRoot = root;
@@ -37,11 +46,22 @@ interface ComponentInterface {
     style: string
 }
 interface InputProps {
-    root: any,
+    root: Element,
     data: Object,
     methods: MethodsInterface,
-    appendTo: any
+    appendTo: Element | ShadowRoot | HTMLElement
 }
+
+/**
+ * Creates a native web component with reactivity from Vytic
+ * 
+ * @param {Object} obj - An object.
+ * @param {string} name - Name of the web component. Must be written in kebap case
+ * @param {string} template - HTML markup as a sting. Only 1 element is allowed to be in a component. Multiple elements needs to be wrapped in an container
+ * @param {string} style - CSS string. Only available inside the component
+ * @param {Object} data - Contains data
+ * @param {Object} methods - Contains methods for mutating data
+ */
 export function createWebComponent({ name, template, style = "", data = {}, methods = {} }: ComponentInterface) {
     let classes: { [key: string]: any } = {
         name

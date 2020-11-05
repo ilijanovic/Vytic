@@ -1,3 +1,12 @@
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
 import { addAttributes, addHandlers, deleteElement, insertElement, nextTick, updateAttributes, updateClasses, updateStylings } from "./utils.js";
 export class Reactivity {
     constructor(vDom, data, methods) {
@@ -19,15 +28,17 @@ export class Reactivity {
             get: function (obj, prop) {
                 return obj[prop];
             }.bind(this),
-            set: async function (obj, prop, newVal) {
-                obj[prop] = newVal;
-                if (!this.updating) {
-                    this.updating = true;
-                    await nextTick();
-                    this.update(this.vDom, this.methods, this.components);
-                    this.updating = false;
-                }
-                return true;
+            set: function (obj, prop, newVal) {
+                return __awaiter(this, void 0, void 0, function* () {
+                    obj[prop] = newVal;
+                    if (!this.updating) {
+                        this.updating = true;
+                        yield nextTick();
+                        this.update(this.vDom, this.methods, this.components);
+                        this.updating = false;
+                    }
+                    return true;
+                });
             }.bind(this),
         };
     }

@@ -1,6 +1,16 @@
 import { parseHTML } from "./helpers/parser.js";
 import { Reactivity } from "./helpers/reactivity.js";
 import { parseStringToElement } from "./helpers/utils.js";
+/**
+ * Creates a new Vytic instance
+ * Compiles the HTML markup down to an virtual DOM. It parses the DOM an replaces it with the root element
+ *
+ * @constructor
+ * @param {Element} root - The root element that will be reactive later
+ * @param {Object} data - Objects that holds data. Will be replaced by an proxy object to track changes
+ * @param {Object} methods - Methods to mutate data
+ * @param {ShadowRoot | HTMLElement | Element} appendTo - Instead of replacing the root element with the parsed element, the element will be appended instead on the "appendAt" element
+ */
 export class Vytic {
     constructor({ root = null, data = {}, methods = {}, appendTo }) {
         if (!root)
@@ -25,6 +35,12 @@ export class Vytic {
         });
     }
 }
+/**
+ * Creates a native web component with reactivity from Vytic
+ *
+ * @param {Object} obj - An object.
+ * @param {string} name - Name of the web component
+ */
 export function createWebComponent({ name, template, style = "", data = {}, methods = {} }) {
     let classes = {
         name
@@ -39,8 +55,8 @@ export function createWebComponent({ name, template, style = "", data = {}, meth
             shadowRoot.appendChild(st);
             new Vytic({
                 root: el,
-                data: { ...data },
-                methods: { ...methods },
+                data: Object.assign({}, data),
+                methods: Object.assign({}, methods),
                 appendTo: shadowRoot
             });
         }

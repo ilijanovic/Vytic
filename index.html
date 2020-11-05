@@ -1,59 +1,39 @@
 <!DOCTYPE html>
 <html lang="en">
-
-<body>
-    <div id="root">
-        <button @click="toggle">Toggle</button>
-        <button @click="inc">Counter: {{count}}</button>
-        <green-button if="visible"></green-button>
-        <img a:src="path" />
-    </div>
-</body>
-<script type="module">
-    import { Vytic, createWebComponent } from "./dist/vytic.js";
-    new Vytic({
-        root: document.getElementById("root"),
-        data: {
-            count: 0,
-            visible: false,
-            path: "https://cdn.pixabay.com/photo/2020/04/04/20/00/sea-bird-5003667_1280.jpg"
-        },
-        methods: {
-            inc() {
-                this.count++
-
+    <body>
+        <custom-button></custom-button>
+    </body>
+    <script type="module">
+        import { createWebComponent } from "./dist/vytic.js";
+        createWebComponent({
+            name: "custom-button",
+            template: `
+                <div>
+                    <input @input="inc" />
+                    <p>Counter: {{count}}</p>
+                    <p>Text: {{text}}</p>
+                    <input a:value="text" />
+                  </div>
+                `,
+            style: `
+                button {
+                    background: green;
+                    color: white;
+                }
+            `,
+            methods: {
+                inc({ target }){
+                    this.text = target.value;
+                    this.count++
+                }
             },
-            toggle() {
-                this.visible = !this.visible
+            data: {
+                count: 0, 
+                text: ""
             }
-        }
-    })
+        })
+    </script>
+    <style>
 
-    createWebComponent({
-        name: "green-button",
-        template: `<button @click="inc">Click me! {{counter}}</button>`,
-        style: `
-            button {
-                background: green;
-                border-radius: 6px;
-                color: white;
-                padding: 10px;
-                border: none;
-            }
-        `,
-        methods: {
-            inc() {
-                this.counter++
-            }
-        },
-        data: {
-            counter: 0
-        }
-    })
-
-
-</script>
-
+    </style>
 </html>
-
-<style></style>

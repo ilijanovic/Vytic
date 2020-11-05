@@ -3,8 +3,7 @@
       "outDir": "./dist",
       "noImplicitAny": true,
       "allowJs": false,
-      "module": "ES2020",
-      "target": "ES2018",
+      "target": "ES6",
       "moduleResolution": "node",
       
       "plugins": [
