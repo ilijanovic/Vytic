@@ -85,7 +85,7 @@ export class Reactivity {
             console.log(!value && visible)
             if (!value && visible) {
                 console.log(vDom.element)
-                //deleteElement(vDom.element)
+                deleteElement(vDom.element)
                 vDom.attributes.visible = false
                 return
             }
