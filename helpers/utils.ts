@@ -1,6 +1,12 @@
 import { MethodsInterface, parseString } from "./reactivity"
 
-export function collectAttributes(element: HTMLElement | Element): AttributesInterface {
+/**
+ * Collects all attributes from an element.
+ * 
+ * @param {HTMLElement} element - Element where the attributes gets collected
+ * @returns {Object} - Returns Object that contains data / state about the element
+ */
+export function collectAttributes(element: Element): AttributesInterface {
     return Array.from(element.attributes, ({ name, value }) => [
         name,
         value,
@@ -47,6 +53,12 @@ export interface AttributesInterface {
     index: number
 }
 
+/**
+ * Formats an string that it can be parsed later with "parseString"
+ * 
+ * @param {String} text - String that needs to be formatted
+ * @returns {string} - Returns formatted string
+ */
 export function formatText(text: String): string {
     if (!text)
         return "";
@@ -62,41 +74,81 @@ export function formatText(text: String): string {
     return text.replace(/\n/g, "")
 }
 
-
+/**
+ *  Parses an string to an element
+ * 
+ * @param {string} template - HTML markup as an string
+ * @returns {Element} - Returns an HTML element
+ */
 export function parseStringToElement(template: string): Element {
     let div = document.createElement("div")
     div.innerHTML = template
     return div.children[0]
 }
 
+/**
+ * Deletes an element out of the DOM
+ * 
+ * @param {HTMLElement} element - Element that will be deleted
+ */
 export function deleteElement(element: HTMLElement): void {
     let parent = element.parentNode;
     parent.removeChild(element)
 }
-export function insertElement(element: HTMLElement, parent: HTMLElement, index: number = 0): void {
 
+/**
+ * Inserts an element on a specific position
+ * By default it inserts it at index 0
+ * 
+ * @param {HTMLElement} element - Element that will be inserted
+ * @param {HTMLElement} parent - Parent element 
+ * @param {number} index - Position of the element in the parent element
+ */
+export function insertElement(element: HTMLElement, parent: HTMLElement, index: number = 0): void {
     parent.insertBefore(element, parent.children[index]);
 }
-export function validHTML(element: HTMLElement | Element): Boolean {
-    return document.createElement(element.tagName.toUpperCase()).toString() != "[object HTMLUnknownElement]";
-}
 
-export function nextTick(): Promise<any> {
+
+/**
+ * Waits for the next request frame
+ * 
+ * @returns {Promise<number>} - Resolves an request ID number
+ */
+export function nextTick(): Promise<number> {
     return new Promise(res => requestAnimationFrame(res))
 }
 
+/**
+ * Attaches event handler to an element
+ * 
+ * @param {string[][]} handlers - Array filled with event / name subarrays [event, handler]
+ * @param {Object} methods - Object that contains all methods
+ * @param {Element} element - Element where the event handlers will be attached 
+ */
 export function addHandlers(handlers: string[][], methods: MethodsInterface, element: Element): void {
     handlers.forEach(([handler, method]) => {
         element.addEventListener(handler, methods[method])
     })
 }
-
+/**
+ * Adds static attributes to an element
+ * 
+ * @param {string[][]} attributes - Array filled with attribute / value subarrays [attribute, value]
+ * @param {Element} element - Element where the attributes will be set
+ */
 export function addAttributes(attributes: string[][], element: Element): void {
     attributes.forEach(([attribute, value]) => {
         element.setAttribute(attribute, value)
     })
 }
-export function updateClasses(classes: string[][], data: Object, element: Element): void {
+/**
+ * Updates binded classes
+ * 
+ * @param {string[][]} classes - Array filled with classname / value subarrays [classname, value]
+ * @param {Object} data - Proxy object that holds the data
+ * @param {HTMLElement} element - Element where the classes will be added / removed
+ */
+export function updateClasses(classes: string[][], data: Object, element: HTMLElement): void {
     classes.forEach(([cl, value]) => {
         let status = !!parseString(value, data)
         if (status) {
@@ -106,14 +158,28 @@ export function updateClasses(classes: string[][], data: Object, element: Elemen
         }
     })
 }
+
+/**
+ * Updates binded styles
+ * 
+ * @param {string[][]} stylings - Array filled with styleproperty / value subarrays [styleproperty, value] 
+ * @param {Object} data - Proxy object that holds the data
+ * @param {HTMLElement} element - Element where the styling properties will be updated
+ */
 export function updateStylings(stylings: string[][], data: Object, element: HTMLElement): void {
     stylings.forEach(([style, stringVariable]) => {
         let value = parseString(stringVariable, data)
         element.style.setProperty(style, value)
     })
 }
-
-export function updateAttributes(attributes: string[][], data: Object, element: Element): void {
+/**
+ * Updates binded attributes
+ * 
+ * @param {string[][]} stylings - Array filled with attributename / value subarrays [attributename, value] 
+ * @param {Object} data - Proxy object that holds the data
+ * @param {HTMLElement} element - Element where the attribute properties will be updated
+ */
+export function updateAttributes(attributes: string[][], data: Object, element: HTMLElement): void {
     attributes.forEach(([attr, value]) => {
         let parsed = parseString(value, data)
         if (value !== element.getAttribute(attr)) {

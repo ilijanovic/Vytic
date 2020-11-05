@@ -61,13 +61,14 @@ interface InputProps {
  * @param {string} style - CSS string. Only available inside the component
  * @param {Object} data - Contains data
  * @param {Object} methods - Contains methods for mutating data
+ * @returns {ShadowRoot} - Returns the reactive shadow element
  */
-export function createWebComponent({ name, template, style = "", data = {}, methods = {} }: ComponentInterface) {
+export function createWebComponent({ name, template, style = "", data = {}, methods = {} }: ComponentInterface): ShadowRoot {
     let classes: { [key: string]: any } = {
         name
     }
-    classes.name = class extends HTMLElement {
-        shadowRoot: ShadowRoot
+    classes[name] = class extends HTMLElement {
+        shadow: ShadowRoot
         constructor() {
             super();
             let el = parseStringToElement(template)
@@ -75,6 +76,7 @@ export function createWebComponent({ name, template, style = "", data = {}, meth
             let st = document.createElement("style");
             st.appendChild(document.createTextNode(style))
             shadowRoot.appendChild(st)
+            this.shadow = shadowRoot
             new Vytic({
                 root: el,
                 data: { ...data },
@@ -84,8 +86,8 @@ export function createWebComponent({ name, template, style = "", data = {}, meth
         };
 
     }
-    window.customElements.define(name, classes.name);
-    return name
+    window.customElements.define(name, classes[name]);
+    return classes[name].shadow
 }
 
 

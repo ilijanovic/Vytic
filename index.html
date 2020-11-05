@@ -1,35 +1,43 @@
 <!DOCTYPE html>
 <html lang="en">
     <body>
-        <custom-button></custom-button>
+        <div id="root">
+            <button style="display: block;" @click="toggle">Toggle</button>
+            <custom-button if="!visible"></custom-button>
+        </div>
     </body>
     <script type="module">
-        import { createWebComponent } from "./dist/vytic.js";
+        import { Vytic, createWebComponent } from "./dist/vytic.js";
+        new Vytic({
+            root: document.getElementById("root"),
+            methods: {
+                toggle(){
+                    this.visible = !this.visible
+                }
+            },
+            data: {
+                visible: true
+            }
+        })
         createWebComponent({
             name: "custom-button",
-            template: `
-                <div>
-                    <input @input="inc" />
-                    <p>Counter: {{count}}</p>
-                    <p>Text: {{text}}</p>
-                    <input a:value="text" />
-                  </div>
-                `,
+            template: `<button @click="increase">{{count}}</button>`,
             style: `
                 button {
                     background: green;
                     color: white;
+                    padding: 20px;
+                    cursor: pointer;
+                    border: none;
                 }
             `,
             methods: {
-                inc({ target }){
-                    this.text = target.value;
+                increase(){
                     this.count++
                 }
             },
             data: {
                 count: 0, 
-                text: ""
             }
         })
     </script>

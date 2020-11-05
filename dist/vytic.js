@@ -39,13 +39,18 @@ export class Vytic {
  * Creates a native web component with reactivity from Vytic
  *
  * @param {Object} obj - An object.
- * @param {string} name - Name of the web component
+ * @param {string} name - Name of the web component. Must be written in kebap case
+ * @param {string} template - HTML markup as a sting. Only 1 element is allowed to be in a component. Multiple elements needs to be wrapped in an container
+ * @param {string} style - CSS string. Only available inside the component
+ * @param {Object} data - Contains data
+ * @param {Object} methods - Contains methods for mutating data
+ * @returns {ShadowRoot} - Returns the reactive shadow element
  */
 export function createWebComponent({ name, template, style = "", data = {}, methods = {} }) {
     let classes = {
         name
     };
-    classes.name = class extends HTMLElement {
+    classes[name] = class extends HTMLElement {
         constructor() {
             super();
             let el = parseStringToElement(template);
@@ -53,6 +58,7 @@ export function createWebComponent({ name, template, style = "", data = {}, meth
             let st = document.createElement("style");
             st.appendChild(document.createTextNode(style));
             shadowRoot.appendChild(st);
+            this.shadow = shadowRoot;
             new Vytic({
                 root: el,
                 data: Object.assign({}, data),
@@ -62,6 +68,6 @@ export function createWebComponent({ name, template, style = "", data = {}, meth
         }
         ;
     };
-    window.customElements.define(name, classes.name);
-    return name;
+    window.customElements.define(name, classes[name]);
+    return classes[name].shadow;
 }

@@ -1,7 +1,13 @@
 import { AttributesInterface, collectAttributes, formatText } from "../helpers/utils"
 
-export function parseHTML(html: HTMLElement | Element): VirtualDomInterface {
-
+/**
+ * Compiles HTML down to an virtual DOM.
+ * Element will not be deleted
+ * 
+ * @param {Element} html - Element that will be compiled down to an virtual DOM
+ * @returns {Object} - Returns virtual DOM representation of the element 
+ */
+export function parseHTML(html: Element): VirtualDomInterface {
     return {
         tag: html.tagName,
         text: "",

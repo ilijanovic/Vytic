@@ -1,4 +1,11 @@
 import { collectAttributes, formatText } from "../helpers/utils.js";
+/**
+ * Compiles HTML down to an virtual DOM.
+ * Element will not be deleted
+ *
+ * @param {Element} html - Element that will be compiled down to an virtual DOM
+ * @returns {Object} - Returns virtual DOM representation of the element
+ */
 export function parseHTML(html) {
     var _a;
     return {
