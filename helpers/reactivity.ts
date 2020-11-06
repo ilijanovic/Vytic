@@ -1,5 +1,5 @@
 
-import { ComponentInterface, Vytic } from "../vytic";
+import { ComponentInterface, idCollector, Vytic } from "../vytic";
 import { VirtualDomInterface } from "./parser";
 import { addAttributes, addHandlers, deleteElement, insertElement, nextTick, updateAttributes, updateClasses, updateStylings } from "./utils";
 export type ComponentType = { [key: string]: ComponentInterface }
@@ -83,8 +83,14 @@ export class Reactivity {
                 let vytic = new Vytic({ index: vDom.attributes.index, parent, ...components[vDom.tag] })
                 vDom.element = vytic.getReactiveElement()
                 isComponent = true
+                if (vDom.tag in idCollector) {
+                    vDom.styleId = idCollector[vDom.tag]
+                    vDom.element.setAttribute(vDom.styleId, "")
+                }
             } else {
+
                 vDom.element = document.createElement(vDom.tag)
+
             }
             if (showStat !== null) {
                 let value = !!parseString(showStat, this.heap)
@@ -129,7 +135,6 @@ export class Reactivity {
 
             insertElement(vDom.element, parent, this.index !== undefined ? this.index : vDom.attributes.index)
         }
-        if (isComponent) return vDom.element
         for (let child of vDom.children) {
             let childElement = this.update({ vDom: child, methods, components, parent: vDom.element, once })
             if (once) {
@@ -137,9 +142,8 @@ export class Reactivity {
                     vDom.element.appendChild(childElement)
                 }
             }
-
-
         }
+        if (isComponent) return vDom.element
         let parsedText = parseString(vDom.originalText, this.heap)
         if (parsedText !== vDom.text) {
             vDom.element.textContent = parsedText

@@ -1,6 +1,6 @@
 import { parseHTML } from "./helpers/parser.js";
 import { Reactivity } from "./helpers/reactivity.js";
-import { parseStringToElement, nextTick, objectKeysToUppercase, looseRef } from "./helpers/utils.js";
+import { parseStringToElement, nextTick, objectKeysToUppercase, looseRef, generateId, uniqueStylesheet, addCSS } from "./helpers/utils.js";
 /**
  * Creates a new Vytic instance
  * Compiles the HTML markup down to an virtual DOM. It parses the DOM an replaces it with the root element
@@ -12,7 +12,7 @@ import { parseStringToElement, nextTick, objectKeysToUppercase, looseRef } from 
  * @param {ShadowRoot | HTMLElement | Element} appendTo - Instead of replacing the root element with the parsed element, the element will be appended instead on the "appendAt" element
  */
 class Vytic {
-    constructor({ root = null, data = {}, methods = {}, appendTo, ready, parent, components = {}, index }) {
+    constructor({ root = null, data = {}, style = "", methods = {}, appendTo, ready, parent, components = {}, index }) {
         if (typeof root === "string") {
             root = parseStringToElement(root);
         }
@@ -22,7 +22,10 @@ class Vytic {
         components = objectKeysToUppercase(components);
         methods = looseRef(methods);
         let oldRoot = root;
-        let vDom = parseHTML(root);
+        let styleId = generateId(5);
+        let scopedStyle = uniqueStylesheet(style, styleId);
+        addCSS(scopedStyle);
+        let vDom = parseHTML(root, styleId);
         let reactivity = new Reactivity({ vDom, data, methods, components, parent, index });
         let heap = reactivity.makeReactive();
         let rootElement = reactivity.update({ vDom: reactivity.vDom, methods, components, parent, once: true });
@@ -39,15 +42,12 @@ class Vytic {
         if (typeof root !== "string") {
             oldRoot.replaceWith(rootElement);
         }
-        console.log(vDom);
     }
     getReactiveElement() {
         return this.root;
     }
 }
-export function component(component) {
-    return component;
-}
+export const idCollector = {};
 /**
  * Creates a native web component with reactivity from Vytic
  *

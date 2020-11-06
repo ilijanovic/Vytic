@@ -7,7 +7,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
-import { Vytic } from "../vytic.js";
+import { idCollector, Vytic } from "../vytic.js";
 import { addAttributes, addHandlers, deleteElement, insertElement, nextTick, updateAttributes, updateClasses, updateStylings } from "./utils.js";
 export class Reactivity {
     constructor({ vDom, data, methods, components, parent, index }) {
@@ -63,6 +63,10 @@ export class Reactivity {
                 let vytic = new Vytic(Object.assign({ index: vDom.attributes.index, parent }, components[vDom.tag]));
                 vDom.element = vytic.getReactiveElement();
                 isComponent = true;
+                if (vDom.tag in idCollector) {
+                    vDom.styleId = idCollector[vDom.tag];
+                    vDom.element.setAttribute(vDom.styleId, "");
+                }
             }
             else {
                 vDom.element = document.createElement(vDom.tag);
@@ -106,8 +110,6 @@ export class Reactivity {
         if (vDom.attributes.visible) {
             insertElement(vDom.element, parent, this.index !== undefined ? this.index : vDom.attributes.index);
         }
-        if (isComponent)
-            return vDom.element;
         for (let child of vDom.children) {
             let childElement = this.update({ vDom: child, methods, components, parent: vDom.element, once });
             if (once) {
@@ -116,6 +118,8 @@ export class Reactivity {
                 }
             }
         }
+        if (isComponent)
+            return vDom.element;
         let parsedText = parseString(vDom.originalText, this.heap);
         if (parsedText !== vDom.text) {
             vDom.element.textContent = parsedText;

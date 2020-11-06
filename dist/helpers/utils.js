@@ -189,3 +189,40 @@ export function objectKeysToUppercase(components) {
 export function looseRef(obj) {
     return Object.assign({}, obj);
 }
+/**
+ *
+ * @param {Number} length - Length of the random generated string
+ * @returns {String}      - Returns an random generated string
+ */
+export function generateId(length) {
+    var result = "";
+    var characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+    var charactersLength = characters.length;
+    for (var i = 0; i < length; i++) {
+        result += characters.charAt(Math.floor(Math.random() * charactersLength));
+    }
+    return `vytic-id-${result}`;
+}
+/**
+ *
+ * Appends CSS to the head
+ *
+ * @param {String} style - CSS as an string
+ * @returns - undefined
+ */
+export function addCSS(style) {
+    let head = document.getElementsByTagName("head")[0];
+    let css = document.createElement("style");
+    head.appendChild(css);
+    css.appendChild(document.createTextNode(style));
+}
+/**
+ *
+ * @param {String} style - CSS string
+ * @param {String} id    - ID that will be appendend after every scoped CSS class.
+ */
+export function uniqueStylesheet(style, id) {
+    id = id.toLowerCase();
+    let newStyle = style.replace(/\s+{|{/g, `[${id}] {`);
+    return newStyle;
+}

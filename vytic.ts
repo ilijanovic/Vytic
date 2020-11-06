@@ -1,7 +1,7 @@
 
 import { parseHTML } from "./helpers/parser"
 import { Reactivity, MethodsInterface, ComponentType } from "./helpers/reactivity"
-import { parseStringToElement, nextTick, objectKeysToUppercase, looseRef } from "./helpers/utils";
+import { parseStringToElement, nextTick, objectKeysToUppercase, looseRef, generateId, uniqueStylesheet } from "./helpers/utils";
 
 
 /**
@@ -16,7 +16,7 @@ import { parseStringToElement, nextTick, objectKeysToUppercase, looseRef } from 
  */
 class Vytic {
     root: Element | ShadowRoot
-    constructor({ root = null, data = {}, methods = {}, appendTo, ready, parent, components = {}, index }: InputProps) {
+    constructor({ root = null, data = {}, style = "", methods = {}, appendTo, ready, parent, components = {}, index }: InputProps) {
         if (typeof root === "string") {
             root = parseStringToElement(root)
         } else if (!root) {
@@ -25,7 +25,9 @@ class Vytic {
         components = objectKeysToUppercase(components)
         methods = looseRef(methods)
         let oldRoot = root;
-        let vDom = parseHTML(root)
+        let styleId = generateId(15)
+        let scopedStyle = uniqueStylesheet(style, styleId)
+        let vDom = parseHTML(root, scopedStyle)
         let reactivity = new Reactivity({ vDom, data, methods, components, parent, index })
         let heap = reactivity.makeReactive()
         let rootElement = reactivity.update({ vDom: reactivity.vDom, methods, components, parent, once: true })
@@ -42,15 +44,11 @@ class Vytic {
         if (typeof root !== "string") {
             oldRoot.replaceWith(rootElement)
         }
-        console.log(vDom)
     }
 
     public getReactiveElement(): any {
         return this.root
     }
-}
-export function component(component: ComponentInterface) {
-    return component
 }
 
 export interface WebComponentInterface {

@@ -6,14 +6,15 @@ import { collectAttributes, formatText } from "../helpers/utils.js";
  * @param {Element} html - Element that will be compiled down to an virtual DOM
  * @returns {Object} - Returns virtual DOM representation of the element
  */
-export function parseHTML(html) {
+export function parseHTML(html, styleId) {
     var _a;
     return {
         tag: html.tagName,
         text: "",
+        styleId,
         originalText: formatText((_a = html.childNodes[0]) === null || _a === void 0 ? void 0 : _a.nodeValue),
         element: null,
-        children: Array.from(html.children).map(child => parseHTML(child)),
+        children: Array.from(html.children).map(child => parseHTML(child, styleId)),
         attributes: collectAttributes(html)
     };
 }
