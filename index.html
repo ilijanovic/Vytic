@@ -2,10 +2,16 @@
 <html lang="en">
   <body>
     <div id="root">
-      <buttn if="!visible"></buttn>
-      <buttn></buttn>
-      <button style="display: block;" @click="toggle">Start</button>
-      <buttn></buttn>
+      <div>
+        <button @click="inc1">toggle</button>
+        <button @click="inc2">toggle</button>
+        <button @click="inc3">toggle</button>
+        <button @click="inc4">toggle</button>
+      </div>
+      <button if="butt1">1</button>
+      <button if="butt2">2</button>
+      <button if="butt3">3</button>
+      <buttn if="butt4">4</buttn>
     </div>
   </body>
   <script type="module">
@@ -17,10 +23,27 @@
         toggle() {
           this.visible = !this.visible;
         },
+        test() {
+          console.log("i work", this);
+        },
+        inc1() {
+          this.butt1 = !this.butt1;
+        },
+        inc2() {
+          this.butt2 = !this.butt2;
+        },
+        inc3() {
+          this.butt3 = !this.butt3;
+        },
+        inc4() {
+          this.butt4 = !this.butt4;
+        },
       },
       data: {
-        visible: false,
-        count: true,
+        butt1: true,
+        butt2: true,
+        butt3: true,
+        butt4: true,
       },
       components: {
         buttn,
@@ -30,6 +53,12 @@
   <style>
     div {
       transition: 300ms;
+    }
+    #root {
+      display: flex;
+    }
+    button {
+      display: block;
     }
   </style>
 </html>

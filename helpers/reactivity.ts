@@ -4,6 +4,21 @@ import { VirtualDomInterface } from "./parser";
 import { addAttributes, addHandlers, deleteElement, insertElement, nextTick, updateAttributes, updateClasses, updateStylings } from "./utils";
 export type ComponentType = { [key: string]: ComponentInterface }
 
+export interface UpdateInterface {
+    vDom: VirtualDomInterface,
+    methods: MethodsInterface,
+    components: ComponentType,
+    parent: Element,
+    once: Boolean
+}
+export interface ReactivityInterface {
+    vDom: VirtualDomInterface,
+    data: Object,
+    methods: MethodsInterface,
+    components: ComponentType,
+    parent: Element,
+    index?: number
+}
 
 export class Reactivity {
     vDom: VirtualDomInterface;
@@ -11,12 +26,16 @@ export class Reactivity {
     updating: Boolean;
     heap: Object
     components: ComponentType
-    constructor(vDom: VirtualDomInterface, data: Object, methods: MethodsInterface, components: ComponentType) {
-        this.vDom = vDom;
+    parent: Element
+    index: number
+    constructor({ vDom, data, methods, components, parent, index }: ReactivityInterface) {
         this.methods = methods;
         this.updating = false
         this.components = components;
         this.heap = { ...data, ...this.methods }
+        this.parent = parent
+        this.vDom = vDom
+        this.index = index
     }
 
     makeReactive(): Object {
@@ -39,7 +58,7 @@ export class Reactivity {
                 if (!this.updating) {
                     this.updating = true
                     await nextTick()
-                    this.update(this.vDom, this.methods, this.components)
+                    this.update({ vDom: this.vDom, methods: this.methods, components: this.components, parent: this.parent, index: this.index })
 
                     this.updating = false
                 }
@@ -47,8 +66,8 @@ export class Reactivity {
             }.bind(this),
         };
     }
-    update(vDom: VirtualDomInterface, methods: MethodsInterface, components: ComponentType, once: Boolean = false): Element {
-        let isComponent = false
+    update({ vDom, methods, components, parent, once = false }: UpdateInterface): Element {
+        let isComponent = vDom.tag in components;
         let stylings = vDom.attributes.bindedStyle
         let handlers = vDom.attributes.handlers
         let attrs = vDom.attributes.attr
@@ -56,10 +75,12 @@ export class Reactivity {
         let visible = vDom.attributes.visible
         let classes = vDom.attributes.bindedClasses
         let bindedAttrs = vDom.attributes.bindedAttr
-
+        if (!parent) {
+            parent = vDom.attributes.parent
+        }
         if (once) {
             if (vDom.tag in components) {
-                let vytic = new Vytic({ ...components[vDom.tag] })
+                let vytic = new Vytic({ index: vDom.attributes.index, parent, ...components[vDom.tag] })
                 vDom.element = vytic.getReactiveElement()
                 isComponent = true
             } else {
@@ -73,42 +94,44 @@ export class Reactivity {
                 }
             }
 
-            if (isComponent) return vDom.element
-            addHandlers(handlers, methods, vDom.element)
+            addHandlers(handlers, methods, vDom.element, this.heap)
             addAttributes(attrs, vDom.element)
             updateClasses(classes, this.heap, vDom.element)
 
         }
         if (showStat !== null) {
             let value = !!parseString(showStat, this.heap)
-            console.log(value, visible)
-            console.log(!value && visible)
             if (!value && visible) {
-                console.log(vDom.element)
                 deleteElement(vDom.element)
                 vDom.attributes.visible = false
                 return
             }
             if (value && !visible) {
                 vDom.attributes.visible = true
-                vDom.element = document.createElement(vDom.tag)
-                addHandlers(handlers, methods, vDom.element)
+                if (vDom.tag in components) {
+                    let vytic = new Vytic({ index: vDom.attributes.index, parent, ...components[vDom.tag] })
+                    vDom.element = vytic.getReactiveElement()
+                    isComponent = true
+                } else {
+                    vDom.element = document.createElement(vDom.tag)
+                }
+                addHandlers(handlers, methods, vDom.element, this.heap)
                 addAttributes(attrs, vDom.element)
-                insertElement(vDom.element, vDom.attributes.parent, vDom.attributes.index)
+                insertElement(vDom.element, parent, this.index !== undefined ? this.index : vDom.attributes.index)
             }
         }
-
 
 
         updateStylings(stylings, this.heap, vDom.element)
         updateClasses(classes, this.heap, vDom.element)
         updateAttributes(bindedAttrs, this.heap, vDom.element)
+        if (vDom.attributes.visible) {
 
+            insertElement(vDom.element, parent, this.index !== undefined ? this.index : vDom.attributes.index)
+        }
         if (isComponent) return vDom.element
-
-
         for (let child of vDom.children) {
-            let childElement = this.update(child, methods, components, once)
+            let childElement = this.update({ vDom: child, methods, components, parent: vDom.element, once })
             if (once) {
                 if (childElement !== null) {
                     vDom.element.appendChild(childElement)

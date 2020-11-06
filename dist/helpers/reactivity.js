@@ -8,14 +8,16 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 import { Vytic } from "../vytic.js";
-import { addAttributes, addHandlers, insertElement, nextTick, updateAttributes, updateClasses, updateStylings } from "./utils.js";
+import { addAttributes, addHandlers, deleteElement, insertElement, nextTick, updateAttributes, updateClasses, updateStylings } from "./utils.js";
 export class Reactivity {
-    constructor(vDom, data, methods, components) {
-        this.vDom = vDom;
+    constructor({ vDom, data, methods, components, parent, index }) {
         this.methods = methods;
         this.updating = false;
         this.components = components;
         this.heap = Object.assign(Object.assign({}, data), this.methods);
+        this.parent = parent;
+        this.vDom = vDom;
+        this.index = index;
     }
     makeReactive() {
         let reactiveData = new Proxy(this.heap, this.proxyHandler());
@@ -36,7 +38,7 @@ export class Reactivity {
                     if (!this.updating) {
                         this.updating = true;
                         yield nextTick();
-                        this.update(this.vDom, this.methods, this.components);
+                        this.update({ vDom: this.vDom, methods: this.methods, components: this.components, parent: this.parent, index: this.index });
                         this.updating = false;
                     }
                     return true;
@@ -44,8 +46,8 @@ export class Reactivity {
             }.bind(this),
         };
     }
-    update(vDom, methods, components, once = false) {
-        let isComponent = false;
+    update({ vDom, methods, components, parent, once = false }) {
+        let isComponent = vDom.tag in components;
         let stylings = vDom.attributes.bindedStyle;
         let handlers = vDom.attributes.handlers;
         let attrs = vDom.attributes.attr;
@@ -53,9 +55,12 @@ export class Reactivity {
         let visible = vDom.attributes.visible;
         let classes = vDom.attributes.bindedClasses;
         let bindedAttrs = vDom.attributes.bindedAttr;
+        if (!parent) {
+            parent = vDom.attributes.parent;
+        }
         if (once) {
             if (vDom.tag in components) {
-                let vytic = new Vytic(Object.assign({}, components[vDom.tag]));
+                let vytic = new Vytic(Object.assign({ index: vDom.attributes.index, parent }, components[vDom.tag]));
                 vDom.element = vytic.getReactiveElement();
                 isComponent = true;
             }
@@ -69,37 +74,42 @@ export class Reactivity {
                     return null;
                 }
             }
-            if (isComponent)
-                return vDom.element;
-            addHandlers(handlers, methods, vDom.element);
+            addHandlers(handlers, methods, vDom.element, this.heap);
             addAttributes(attrs, vDom.element);
             updateClasses(classes, this.heap, vDom.element);
         }
         if (showStat !== null) {
             let value = !!parseString(showStat, this.heap);
-            console.log(value, visible);
-            console.log(!value && visible);
             if (!value && visible) {
-                console.log(vDom.element);
-                //deleteElement(vDom.element)
+                deleteElement(vDom.element);
                 vDom.attributes.visible = false;
                 return;
             }
             if (value && !visible) {
                 vDom.attributes.visible = true;
-                vDom.element = document.createElement(vDom.tag);
-                addHandlers(handlers, methods, vDom.element);
+                if (vDom.tag in components) {
+                    let vytic = new Vytic(Object.assign({ index: vDom.attributes.index, parent }, components[vDom.tag]));
+                    vDom.element = vytic.getReactiveElement();
+                    isComponent = true;
+                }
+                else {
+                    vDom.element = document.createElement(vDom.tag);
+                }
+                addHandlers(handlers, methods, vDom.element, this.heap);
                 addAttributes(attrs, vDom.element);
-                insertElement(vDom.element, vDom.attributes.parent, vDom.attributes.index);
+                insertElement(vDom.element, parent, this.index !== undefined ? this.index : vDom.attributes.index);
             }
         }
         updateStylings(stylings, this.heap, vDom.element);
         updateClasses(classes, this.heap, vDom.element);
         updateAttributes(bindedAttrs, this.heap, vDom.element);
+        if (vDom.attributes.visible) {
+            insertElement(vDom.element, parent, this.index !== undefined ? this.index : vDom.attributes.index);
+        }
         if (isComponent)
             return vDom.element;
         for (let child of vDom.children) {
-            let childElement = this.update(child, methods, components, once);
+            let childElement = this.update({ vDom: child, methods, components, parent: vDom.element, once });
             if (once) {
                 if (childElement !== null) {
                     vDom.element.appendChild(childElement);

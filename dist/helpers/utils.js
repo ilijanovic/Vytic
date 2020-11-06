@@ -81,7 +81,6 @@ export function parseStringToElement(template) {
  */
 export function deleteElement(element) {
     let parent = element.parentNode;
-    console.log(element.parentNode);
     parent.removeChild(element);
 }
 /**
@@ -110,9 +109,11 @@ export function nextTick() {
  * @param {Object} methods - Object that contains all methods
  * @param {Element} element - Element where the event handlers will be attached
  */
-export function addHandlers(handlers, methods, element) {
+export function addHandlers(handlers, methods, element, heap) {
     handlers.forEach(([handler, method]) => {
-        element.addEventListener(handler, methods[method]);
+        element.addEventListener(handler, typeof methods[method] === "function" ? methods[method] : () => {
+            //TODO: Add handler for non functions
+        });
     });
 }
 /**

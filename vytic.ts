@@ -16,7 +16,7 @@ import { parseStringToElement, nextTick, objectKeysToUppercase, looseRef } from 
  */
 class Vytic {
     root: Element | ShadowRoot
-    constructor({ root = null, data = {}, methods = {}, appendTo, ready, components = {} }: InputProps) {
+    constructor({ root = null, data = {}, methods = {}, appendTo, ready, parent, components = {}, index }: InputProps) {
         if (typeof root === "string") {
             root = parseStringToElement(root)
         } else if (!root) {
@@ -26,9 +26,9 @@ class Vytic {
         methods = looseRef(methods)
         let oldRoot = root;
         let vDom = parseHTML(root)
-        let reactivity = new Reactivity(vDom, data, methods, components)
+        let reactivity = new Reactivity({ vDom, data, methods, components, parent, index })
         let heap = reactivity.makeReactive()
-        let rootElement = reactivity.update(reactivity.vDom, methods, components, true)
+        let rootElement = reactivity.update({ vDom: reactivity.vDom, methods, components, parent, once: true })
         oldRoot.innerHTML = "";
         if (typeof ready === "function") {
             ready.call(heap)
@@ -39,10 +39,10 @@ class Vytic {
             return
         }
         this.root = rootElement
-        Array.from(rootElement.children).forEach(child => {
-            oldRoot.appendChild(child)
-        })
-
+        if (typeof root !== "string") {
+            oldRoot.replaceWith(rootElement)
+        }
+        console.log(vDom)
     }
 
     public getReactiveElement(): any {
@@ -73,7 +73,9 @@ export interface InputProps {
     methods: MethodsInterface,
     appendTo?: Element | ShadowRoot | HTMLElement,
     ready?: Function,
-    components?: ComponentType
+    components?: ComponentType,
+    parent?: Element,
+    index?: number
 }
 
 /**

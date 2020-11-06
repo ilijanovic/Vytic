@@ -94,7 +94,6 @@ export function parseStringToElement(template: string): Element {
  */
 export function deleteElement(element: HTMLElement): void {
     let parent = element.parentNode;
-    console.log(element.parentNode)
     parent.removeChild(element)
 }
 
@@ -106,7 +105,7 @@ export function deleteElement(element: HTMLElement): void {
  * @param {HTMLElement} parent - Parent element 
  * @param {number} index - Position of the element in the parent element
  */
-export function insertElement(element: HTMLElement, parent: HTMLElement, index: number = 0): void {
+export function insertElement(element: HTMLElement, parent: Element, index: number = 0): void {
     parent.insertBefore(element, parent.children[index]);
 }
 
@@ -127,9 +126,11 @@ export function nextTick(): Promise<number> {
  * @param {Object} methods - Object that contains all methods
  * @param {Element} element - Element where the event handlers will be attached 
  */
-export function addHandlers(handlers: string[][], methods: MethodsInterface, element: Element): void {
+export function addHandlers(handlers: string[][], methods: MethodsInterface, element: Element, heap: Object): void {
     handlers.forEach(([handler, method]) => {
-        element.addEventListener(handler, methods[method])
+        element.addEventListener(handler, typeof methods[method] === "function" ? methods[method] : () => {
+            //TODO: Add handler for non functions
+        })
     })
 }
 /**
@@ -207,3 +208,4 @@ export function objectKeysToUppercase(components: ComponentType) {
 export function looseRef(obj: Object): Object {
     return { ...obj }
 }
+
