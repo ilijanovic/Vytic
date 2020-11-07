@@ -17,6 +17,7 @@ import { parseStringToElement, nextTick, objectKeysToUppercase, looseRef, genera
 class Vytic {
     root: Element | ShadowRoot
     vDom: Object
+    reactiveData: Object
     constructor({ root = null, data = {}, styleId = undefined, methods = {}, appendTo, ready, parent, components = {}, index }: InputProps) {
         if (typeof root === "string") {
             root = parseStringToElement(root)
@@ -31,6 +32,7 @@ class Vytic {
         this.vDom = vDom
         let reactivity = new Reactivity({ vDom, data, methods, components, parent, index, styleId })
         let heap = reactivity.makeReactive()
+        this.reactiveData = heap;
         let rootElement = reactivity.update({ vDom: reactivity.vDom, methods, components, parent, styleId, once: true })
         oldRoot.innerHTML = "";
         if (typeof ready === "function") {
@@ -52,6 +54,10 @@ class Vytic {
     }
     public getVirtualDOM(): Object {
         return this.vDom
+    }
+
+    public getReactiveData(): Object {
+        return this.reactiveData
     }
 }
 export const idCollector: { [key: string]: string } = {}

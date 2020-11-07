@@ -3,6 +3,7 @@
 
 <body>
   <div id="root">
+    <p>Counter: {{counter}}</p>
     <redbutton></redbutton>
     <greenbutton></greenbutton>
   </div>
@@ -11,13 +12,20 @@
   import { Vytic } from "./dist/vytic.js";
   import redbutton from "./components/redButton.js";
   import greenbutton from "./components/greenButton.js"
-  new Vytic({
+  let vytic = new Vytic({
     root: document.getElementById("root"),
+    data: {
+      counter: 0
+    },
     components: {
       redbutton,
       greenbutton
     },
   });
+
+  let proxy = vytic.getReactiveData();
+
+  proxy.counter = 4
 </script>
 <style>
   div {

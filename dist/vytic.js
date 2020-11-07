@@ -26,6 +26,7 @@ class Vytic {
         this.vDom = vDom;
         let reactivity = new Reactivity({ vDom, data, methods, components, parent, index, styleId });
         let heap = reactivity.makeReactive();
+        this.reactiveData = heap;
         let rootElement = reactivity.update({ vDom: reactivity.vDom, methods, components, parent, styleId, once: true });
         oldRoot.innerHTML = "";
         if (typeof ready === "function") {
@@ -46,6 +47,9 @@ class Vytic {
     }
     getVirtualDOM() {
         return this.vDom;
+    }
+    getReactiveData() {
+        return this.reactiveData;
     }
 }
 export const idCollector = {};

@@ -209,3 +209,61 @@ Because they are native components you dont need to wrap them inside an root ele
             }
         })
     </script>
+
+## View Virtual DOM
+
+You can take a look how the Vytic virtual DOM looks like:
+
+    <div id="root">
+        <button @click="inc">Counter: {{counter}}</button>
+    </div>
+
+    <script type="module">
+    import { Vytic } from "./dist/vytic.js";
+
+    let vytic = new Vytic({
+        root: document.getElementById("root"),
+        data: {
+            counter: 0
+        },
+        methods: {
+            inc(){
+                this.counter++
+            }
+        }
+    })
+
+    let vDom = vytic.getVirtualDOM();
+
+    console.log(vDom)
+
+    </script>
+
+## Update the DOM outside of the framework
+
+The object `data` gets converted into an proxy object. Whenever you change some property inside the proxy object the virtual DOM of the current Vytic instance gets scanned and updates the real DOM if there are some changes.
+
+You can get the reactive data object with `getReactiveData()`
+
+    <div id="root">
+        <p>Counter: {{counter}}</p>
+    </div>
+
+    <script type="module">
+    import { Vytic } from "./dist/vytic.js";
+    let vytic = new Vytic({
+        root: document.getElementById("root"),
+        data: {
+            counter: 0
+        },
+    })
+
+    let proxy = vytic.getReactiveData();
+
+    proxy.counter = 5;
+
+    </script>
+
+Instead of `0` you will see `5`
+
+You can use vanilla javascript to update the DOM by just changing the property `counter`
