@@ -46,12 +46,18 @@ You can bind style properties with "s:".
 
 Example:
 
-    <div s:background="color">I am red</div>
+    <div id="root">
+        <div s:background="color">I am red</div>
+    </div>
 
-
-    data: {
-       color: "red"
-    }
+    <script type="module">
+    new Vytic({
+        root: document.getElementById("root"),
+        data: {
+            color: "red"
+        }
+    })
+    </script>
 
 ### Class binding
 
