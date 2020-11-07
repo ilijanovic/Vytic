@@ -8,7 +8,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 import { idCollector, Vytic } from "../vytic.js";
-import { addAttributes, addCSS, addHandlers, deleteElement, generateId, insertElement, nextTick, uniqueStylesheet, updateAttributes, updateClasses, updateStylings } from "./utils.js";
+import { addAttributes, addCSS, addHandlers, deleteElement, generateId, getPosition, insertElement, nextTick, uniqueStylesheet, updateAttributes, updateClasses, updateStylings } from "./utils.js";
 export class Reactivity {
     constructor({ vDom, data, methods, components, parent, index, styleId }) {
         this.methods = methods;
@@ -73,6 +73,13 @@ export class Reactivity {
                         addCSS(scopedStyle);
                     }
                 }
+                if (showStat !== null) {
+                    let value = !!parseString(showStat, this.heap);
+                    if (!value) {
+                        vDom.attributes.visible = false;
+                        return null;
+                    }
+                }
                 let vytic = new Vytic(Object.assign({ styleId, index: vDom.attributes.index, parent }, components[vDom.tag]));
                 vDom.element = vytic.getReactiveElement();
                 isComponent = true;
@@ -123,7 +130,10 @@ export class Reactivity {
         updateClasses(classes, this.heap, vDom.element);
         updateAttributes(bindedAttrs, this.heap, vDom.element);
         if (vDom.attributes.visible) {
-            insertElement(vDom.element, parent, this.index !== undefined ? this.index : vDom.attributes.index);
+            let index = this.index !== undefined ? this.index : vDom.attributes.index;
+            if (getPosition(vDom.element, parent) !== index) {
+                insertElement(vDom.element, parent, index);
+            }
         }
         for (let child of vDom.children) {
             let childElement = this.update({ vDom: child, methods, components, parent: vDom.element, once, styleId });

@@ -226,3 +226,8 @@ export function uniqueStylesheet(style, id) {
     let newStyle = style.replace(/\s+{|{/g, `[${id}] {`);
     return newStyle;
 }
+export function getPosition(element, parent = null) {
+    if (!parent)
+        return [...element.parentElement.children].indexOf(element);
+    return [...parent.children].indexOf(element);
+}

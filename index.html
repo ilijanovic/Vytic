@@ -3,41 +3,32 @@
 
 <body>
   <div id="root">
-    <p>Counter: {{counter}}</p>
-    <redbutton></redbutton>
-    <greenbutton></greenbutton>
+    <sidebar if="visible"></sidebar>
+    <button s:width="'500px'" style="display: flex; margin-left: auto" @click="open">Toggle sidebar</button>
   </div>
 </body>
 <script type="module">
   import { Vytic } from "./dist/vytic.js";
-  import redbutton from "./components/redButton.js";
-  import greenbutton from "./components/greenButton.js"
+  import sidebar from "./components/sidebar.js"
   let vytic = new Vytic({
     root: document.getElementById("root"),
     data: {
-      counter: 0
+      visible: false
+    },
+    methods: {
+      open() {
+        this.visible = !this.visible
+      }
     },
     components: {
-      redbutton,
-      greenbutton
+      sidebar
     },
   });
 
-  let proxy = vytic.getReactiveData();
-
-  proxy.counter = 4
 </script>
 <style>
-  div {
-    transition: 300ms;
-  }
-
-  #root {
-    display: flex;
-  }
-
-  button {
-    display: block;
+  * {
+    margin: 0 auto
   }
 </style>
 

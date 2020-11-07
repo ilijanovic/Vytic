@@ -123,6 +123,13 @@ var Reactivity = /** @class */ (function () {
                         utils_1.addCSS(scopedStyle);
                     }
                 }
+                if (showStat !== null) {
+                    var value = !!parseString(showStat, this.heap);
+                    if (!value) {
+                        vDom.attributes.visible = false;
+                        return null;
+                    }
+                }
                 var vytic = new vytic_1.Vytic(__assign({ styleId: styleId, index: vDom.attributes.index, parent: parent }, components[vDom.tag]));
                 vDom.element = vytic.getReactiveElement();
                 isComponent = true;
@@ -173,7 +180,10 @@ var Reactivity = /** @class */ (function () {
         utils_1.updateClasses(classes, this.heap, vDom.element);
         utils_1.updateAttributes(bindedAttrs, this.heap, vDom.element);
         if (vDom.attributes.visible) {
-            utils_1.insertElement(vDom.element, parent, this.index !== undefined ? this.index : vDom.attributes.index);
+            var index = this.index !== undefined ? this.index : vDom.attributes.index;
+            if (utils_1.getPosition(vDom.element, parent) !== index) {
+                utils_1.insertElement(vDom.element, parent, index);
+            }
         }
         for (var _i = 0, _d = vDom.children; _i < _d.length; _i++) {
             var child = _d[_i];

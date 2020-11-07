@@ -1,7 +1,12 @@
 
 import { ComponentInterface, idCollector, Vytic } from "../vytic";
 import { VirtualDomInterface } from "./parser";
-import { addAttributes, addCSS, addHandlers, deleteElement, generateId, insertElement, nextTick, uniqueStylesheet, updateAttributes, updateClasses, updateStylings } from "./utils";
+import {
+    addAttributes, addCSS, addHandlers, deleteElement,
+    generateId, getPosition, insertElement,
+    nextTick, uniqueStylesheet, updateAttributes,
+    updateClasses, updateStylings
+} from "./utils";
 export type ComponentType = { [key: string]: ComponentInterface }
 
 export interface UpdateInterface {
@@ -83,6 +88,8 @@ export class Reactivity {
             parent = vDom.attributes.parent
         }
         if (once) {
+
+
             if (vDom.tag in components) {
                 if (vDom.tag in idCollector) {
                     styleId = idCollector[vDom.tag]
@@ -96,6 +103,13 @@ export class Reactivity {
                     }
 
                 }
+                if (showStat !== null) {
+                    let value = !!parseString(showStat, this.heap)
+                    if (!value) {
+                        vDom.attributes.visible = false
+                        return null
+                    }
+                }
                 let vytic = new Vytic({ styleId, index: vDom.attributes.index, parent, ...components[vDom.tag] })
                 vDom.element = vytic.getReactiveElement()
                 isComponent = true
@@ -108,8 +122,6 @@ export class Reactivity {
             if (styleId) {
                 vDom.element.setAttribute(styleId, "")
             }
-
-
             if (showStat !== null) {
                 let value = !!parseString(showStat, this.heap)
                 if (!value) {
@@ -154,8 +166,12 @@ export class Reactivity {
         updateClasses(classes, this.heap, vDom.element)
         updateAttributes(bindedAttrs, this.heap, vDom.element)
         if (vDom.attributes.visible) {
+            let index = this.index !== undefined ? this.index : vDom.attributes.index
+            if (getPosition(vDom.element, parent) !== index) {
 
-            insertElement(vDom.element, parent, this.index !== undefined ? this.index : vDom.attributes.index)
+                insertElement(vDom.element, parent, index)
+            }
+
         }
         for (let child of vDom.children) {
             let childElement = this.update({ vDom: child, methods, components, parent: vDom.element, once, styleId })
