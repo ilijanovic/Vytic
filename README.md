@@ -61,12 +61,18 @@ You can toggle classes with "c:"
 
 Example:
 
-    <div c:boxclass="added">I am red</div>
+    <div id="root">
+        <div c:boxclass="added">I am red</div>
+    </div>
 
-
-    data: {
-       added: true
-    }
+    <script type="module">
+    new Vytic({
+        root: document.getElementById("root"),
+        data: {
+            added: true,
+        }
+    })
+    </script>
 
     <style>
     .boxclass {  background: red }
@@ -80,29 +86,41 @@ You can bind attributes with "a:"
 
 Example
 
-    <img a:src="path" />
+    <div id="root">
+        <img a:src="path" />
+    </div>
 
-
-    data: {
-        path: "https://cdn.pixabay.com/photo/2020/04/04/20/00/sea-bird-5003667_1280.jpg"
-    }
+    <script type="module">
+    new Vytic({
+        root: document.getElementById("root"),
+        data: {
+            path: "https://cdn.pixabay.com/photo/2020/04/04/20/00/sea-bird-5003667_1280.jpg"
+        }
+    })
+    </script>
 
 ## Toggle visibility
 
 You can use the "if" directive for toggeling elements.
 
-    <button @click="toggle">Toggle</button>
+    <div id="root">
+        <button @click="toggle">Toggle</button>
+        <div if="visible">Toggle me</div>
+    </div>
 
-    <div if="visible">Toggle me</div>
-
-    data: {
-        visible: true
-    },
-    methods: {
-        toggle(){
-            this.visible = !this.visible
+    <script type="module">
+    new Vytic({
+        root: document.getElementById("root"),
+        data: {
+            visible: true
+        },
+        methods: {
+            toggle(){
+                this.visible = !this.visible
+            }
         }
-    }
+    })
+    </script>
 
 ## Event handlers
 
@@ -110,6 +128,53 @@ You can attach event handlers with `@` and then the event name.
 
 Example: `@click`
 
+## Create Vytic components
+
+You can create components with Vytic. An component is just a simple Object with information in it.
+
+    // redbutton.js
+
+    export default {
+        root: `
+            <button @click="inc">Counter: {{counter}}</div>
+        `,
+        data: {
+            counter: 0
+        },
+        methods: {
+            inc(){
+                this.counter++
+            }
+        },
+        style: `
+            button {
+                background: red;
+                color: white;
+                border: none;
+                padding: 10px;
+                cursor: pointer
+            }
+        `
+    }
+
+You need to register your component in your Vytic instance:
+
+    import redbutton from "./redbutton.js"
+
+    <div id="root">
+        <redbutton></redbutton>
+    </div>
+
+    <script type="module">
+    new Vytic({
+        root: document.getElementById("root"),
+        components: {
+            redbutton
+        }
+    })
+    </script>
+
+The styling in your component is by default scoped.
 
 ## Create native web components
 
