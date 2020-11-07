@@ -1,43 +1,58 @@
 <!DOCTYPE html>
 <html lang="en">
-  <body>
-    <div id="root">
-      <button>test</button>
-      <redbutton></redbutton>
 
-      <redbutton></redbutton>
+<body>
+  <div id="root">
+    <button @click="toggle">Toggle</button>
+    <redbutton></redbutton>
 
-      <redbutton></redbutton>
+    <redbutton></redbutton>
 
-      <redbutton></redbutton>
-    </div>
-  </body>
-  <script type="module">
-    import { Vytic } from "./dist/vytic.js";
-    import redbutton from "./components/redButton.js";
-    new Vytic({
-      root: document.getElementById("root"),
-      components: {},
-      data: {},
-      methods: {
-        inc() {
-          this.counter++;
-        },
-      },
-      components: {
-        redbutton,
-      },
-    });
-  </script>
-  <style>
-    div {
-      transition: 300ms;
-    }
-    #root {
-      display: flex;
-    }
-    button {
-      display: block;
-    }
-  </style>
+    <redbutton></redbutton>
+
+    <redbutton if="visible"></redbutton>
+    <greenbutton></greenbutton>
+
+    <greenbutton></greenbutton>
+
+    <greenbutton if="visible"></greenbutton>
+
+    <greenbutton></greenbutton>
+  </div>
+</body>
+<script type="module">
+  import { Vytic } from "./dist/vytic.js";
+  import redbutton from "./components/redButton.js";
+  import greenbutton from "./components/greenButton.js"
+  new Vytic({
+    root: document.getElementById("root"),
+    components: {},
+    data: {
+      visible: true
+    },
+    methods: {
+      toggle() {
+        this.visible = !this.visible
+      }
+    },
+    components: {
+      redbutton,
+      greenbutton
+    },
+  });
+</script>
+<style>
+  div {
+    transition: 300ms;
+  }
+
+  #root {
+    display: flex;
+  }
+
+  button {
+    display: block;
+  }
+</style>
+
 </html>

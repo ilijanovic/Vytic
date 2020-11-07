@@ -1,7 +1,7 @@
 
 import { ComponentInterface, idCollector, Vytic } from "../vytic";
 import { VirtualDomInterface } from "./parser";
-import { addAttributes, addHandlers, deleteElement, insertElement, nextTick, updateAttributes, updateClasses, updateStylings } from "./utils";
+import { addAttributes, addCSS, addHandlers, deleteElement, generateId, insertElement, nextTick, uniqueStylesheet, updateAttributes, updateClasses, updateStylings } from "./utils";
 export type ComponentType = { [key: string]: ComponentInterface }
 
 export interface UpdateInterface {
@@ -9,7 +9,8 @@ export interface UpdateInterface {
     methods: MethodsInterface,
     components: ComponentType,
     parent: Element,
-    once: Boolean
+    once: Boolean,
+    styleId?: string
 }
 export interface ReactivityInterface {
     vDom: VirtualDomInterface,
@@ -17,7 +18,8 @@ export interface ReactivityInterface {
     methods: MethodsInterface,
     components: ComponentType,
     parent: Element,
-    index?: number
+    index?: number,
+    styleId: string
 }
 
 export class Reactivity {
@@ -28,7 +30,8 @@ export class Reactivity {
     components: ComponentType
     parent: Element
     index: number
-    constructor({ vDom, data, methods, components, parent, index }: ReactivityInterface) {
+    styleId: string
+    constructor({ vDom, data, methods, components, parent, index, styleId }: ReactivityInterface) {
         this.methods = methods;
         this.updating = false
         this.components = components;
@@ -36,6 +39,7 @@ export class Reactivity {
         this.parent = parent
         this.vDom = vDom
         this.index = index
+        this.styleId = styleId
     }
 
     makeReactive(): Object {
@@ -58,7 +62,7 @@ export class Reactivity {
                 if (!this.updating) {
                     this.updating = true
                     await nextTick()
-                    this.update({ vDom: this.vDom, methods: this.methods, components: this.components, parent: this.parent, index: this.index })
+                    this.update({ vDom: this.vDom, methods: this.methods, components: this.components, parent: this.parent, index: this.index, styleId: this.styleId })
 
                     this.updating = false
                 }
@@ -66,7 +70,7 @@ export class Reactivity {
             }.bind(this),
         };
     }
-    update({ vDom, methods, components, parent, once = false }: UpdateInterface): Element {
+    update({ vDom, methods, components, parent, once = false, styleId = "" }: UpdateInterface): Element {
         let isComponent = vDom.tag in components;
         let stylings = vDom.attributes.bindedStyle
         let handlers = vDom.attributes.handlers
@@ -80,18 +84,32 @@ export class Reactivity {
         }
         if (once) {
             if (vDom.tag in components) {
-                let vytic = new Vytic({ index: vDom.attributes.index, parent, ...components[vDom.tag] })
+                if (vDom.tag in idCollector) {
+                    styleId = idCollector[vDom.tag]
+                } else {
+                    if (components[vDom.tag].style) {
+                        let generatedId = generateId(5)
+                        idCollector[vDom.tag] = generatedId
+                        styleId = generatedId
+                        let scopedStyle = uniqueStylesheet(components[vDom.tag].style, styleId)
+                        addCSS(scopedStyle)
+                    }
+
+                }
+                let vytic = new Vytic({ styleId, index: vDom.attributes.index, parent, ...components[vDom.tag] })
                 vDom.element = vytic.getReactiveElement()
                 isComponent = true
-                if (vDom.tag in idCollector) {
-                    vDom.styleId = idCollector[vDom.tag]
-                    vDom.element.setAttribute(vDom.styleId, "")
-                }
+
             } else {
 
                 vDom.element = document.createElement(vDom.tag)
 
             }
+            if (styleId) {
+                vDom.element.setAttribute(styleId, "")
+            }
+
+
             if (showStat !== null) {
                 let value = !!parseString(showStat, this.heap)
                 if (!value) {
@@ -115,8 +133,12 @@ export class Reactivity {
             if (value && !visible) {
                 vDom.attributes.visible = true
                 if (vDom.tag in components) {
-                    let vytic = new Vytic({ index: vDom.attributes.index, parent, ...components[vDom.tag] })
+                    if (vDom.tag in idCollector) {
+                        styleId = idCollector[vDom.tag]
+                    }
+                    let vytic = new Vytic({ styleId, index: vDom.attributes.index, parent, ...components[vDom.tag] })
                     vDom.element = vytic.getReactiveElement()
+
                     isComponent = true
                 } else {
                     vDom.element = document.createElement(vDom.tag)
@@ -136,7 +158,7 @@ export class Reactivity {
             insertElement(vDom.element, parent, this.index !== undefined ? this.index : vDom.attributes.index)
         }
         for (let child of vDom.children) {
-            let childElement = this.update({ vDom: child, methods, components, parent: vDom.element, once })
+            let childElement = this.update({ vDom: child, methods, components, parent: vDom.element, once, styleId })
             if (once) {
                 if (childElement !== null) {
                     vDom.element.appendChild(childElement)

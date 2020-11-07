@@ -1,4 +1,15 @@
 "use strict";
+var __assign = (this && this.__assign) || function () {
+    __assign = Object.assign || function(t) {
+        for (var s, i = 1, n = arguments.length; i < n; i++) {
+            s = arguments[i];
+            for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p))
+                t[p] = s[p];
+        }
+        return t;
+    };
+    return __assign.apply(this, arguments);
+};
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
     return new (P || (P = Promise))(function (resolve, reject) {
@@ -37,20 +48,26 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
 };
 exports.__esModule = true;
 exports.parseString = exports.Reactivity = void 0;
+var vytic_1 = require("../vytic");
 var utils_1 = require("./utils");
 var Reactivity = /** @class */ (function () {
-    function Reactivity(vDom, data, methods) {
-        this.vDom = vDom;
-        this.data = data;
+    function Reactivity(_a) {
+        var vDom = _a.vDom, data = _a.data, methods = _a.methods, components = _a.components, parent = _a.parent, index = _a.index, styleId = _a.styleId;
         this.methods = methods;
         this.updating = false;
+        this.components = components;
+        this.heap = __assign(__assign({}, data), this.methods);
+        this.parent = parent;
+        this.vDom = vDom;
+        this.index = index;
+        this.styleId = styleId;
     }
     Reactivity.prototype.makeReactive = function () {
-        var reactiveData = new Proxy(this.data, this.proxyHandler());
+        var reactiveData = new Proxy(this.heap, this.proxyHandler());
         for (var key in this.methods) {
             this.methods[key] = this.methods[key].bind(reactiveData);
         }
-        this.data = reactiveData;
+        this.heap = reactiveData;
         return reactiveData;
     };
     Reactivity.prototype.proxyHandler = function () {
@@ -69,7 +86,7 @@ var Reactivity = /** @class */ (function () {
                                 return [4 /*yield*/, utils_1.nextTick()];
                             case 1:
                                 _a.sent();
-                                this.update(this.vDom, this.methods, this.components);
+                                this.update({ vDom: this.vDom, methods: this.methods, components: this.components, parent: this.parent, index: this.index, styleId: this.styleId });
                                 this.updating = false;
                                 _a.label = 2;
                             case 2: return [2 /*return*/, true];
@@ -79,8 +96,9 @@ var Reactivity = /** @class */ (function () {
             }.bind(this)
         };
     };
-    Reactivity.prototype.update = function (vDom, methods, once) {
-        if (once === void 0) { once = false; }
+    Reactivity.prototype.update = function (_a) {
+        var vDom = _a.vDom, methods = _a.methods, components = _a.components, parent = _a.parent, _b = _a.once, once = _b === void 0 ? false : _b, _c = _a.styleId, styleId = _c === void 0 ? "" : _c;
+        var isComponent = vDom.tag in components;
         var stylings = vDom.attributes.bindedStyle;
         var handlers = vDom.attributes.handlers;
         var attrs = vDom.attributes.attr;
@@ -88,21 +106,46 @@ var Reactivity = /** @class */ (function () {
         var visible = vDom.attributes.visible;
         var classes = vDom.attributes.bindedClasses;
         var bindedAttrs = vDom.attributes.bindedAttr;
+        if (!parent) {
+            parent = vDom.attributes.parent;
+        }
         if (once) {
-            vDom.element = document.createElement(vDom.tag);
+            if (vDom.tag in components) {
+                if (vDom.tag in vytic_1.idCollector) {
+                    styleId = vytic_1.idCollector[vDom.tag];
+                }
+                else {
+                    if (components[vDom.tag].style) {
+                        var generatedId = utils_1.generateId(5);
+                        vytic_1.idCollector[vDom.tag] = generatedId;
+                        styleId = generatedId;
+                        var scopedStyle = utils_1.uniqueStylesheet(components[vDom.tag].style, styleId);
+                        utils_1.addCSS(scopedStyle);
+                    }
+                }
+                var vytic = new vytic_1.Vytic(__assign({ styleId: styleId, index: vDom.attributes.index, parent: parent }, components[vDom.tag]));
+                vDom.element = vytic.getReactiveElement();
+                isComponent = true;
+            }
+            else {
+                vDom.element = document.createElement(vDom.tag);
+            }
+            if (styleId) {
+                vDom.element.setAttribute(styleId, "");
+            }
             if (showStat !== null) {
-                var value = !!parseString(showStat, this.data);
+                var value = !!parseString(showStat, this.heap);
                 if (!value) {
                     vDom.attributes.visible = false;
                     return null;
                 }
             }
-            utils_1.addHandlers(handlers, methods, vDom.element);
+            utils_1.addHandlers(handlers, methods, vDom.element, this.heap);
             utils_1.addAttributes(attrs, vDom.element);
-            utils_1.updateClasses(classes, this.data, vDom.element);
+            utils_1.updateClasses(classes, this.heap, vDom.element);
         }
         if (showStat !== null) {
-            var value = !!parseString(showStat, this.data);
+            var value = !!parseString(showStat, this.heap);
             if (!value && visible) {
                 utils_1.deleteElement(vDom.element);
                 vDom.attributes.visible = false;
@@ -110,26 +153,42 @@ var Reactivity = /** @class */ (function () {
             }
             if (value && !visible) {
                 vDom.attributes.visible = true;
-                vDom.element = document.createElement(vDom.tag);
-                utils_1.addHandlers(handlers, methods, vDom.element);
-                utils_1.insertElement(vDom.element, vDom.attributes.parent, vDom.attributes.index);
+                if (vDom.tag in components) {
+                    if (vDom.tag in vytic_1.idCollector) {
+                        styleId = vytic_1.idCollector[vDom.tag];
+                    }
+                    var vytic = new vytic_1.Vytic(__assign({ styleId: styleId, index: vDom.attributes.index, parent: parent }, components[vDom.tag]));
+                    vDom.element = vytic.getReactiveElement();
+                    isComponent = true;
+                }
+                else {
+                    vDom.element = document.createElement(vDom.tag);
+                }
+                utils_1.addHandlers(handlers, methods, vDom.element, this.heap);
+                utils_1.addAttributes(attrs, vDom.element);
+                utils_1.insertElement(vDom.element, parent, this.index !== undefined ? this.index : vDom.attributes.index);
             }
         }
-        var parsedText = parseString(vDom.originalText, this.data);
-        if (parsedText !== vDom.text) {
-            vDom.element.textContent = parsedText;
+        utils_1.updateStylings(stylings, this.heap, vDom.element);
+        utils_1.updateClasses(classes, this.heap, vDom.element);
+        utils_1.updateAttributes(bindedAttrs, this.heap, vDom.element);
+        if (vDom.attributes.visible) {
+            utils_1.insertElement(vDom.element, parent, this.index !== undefined ? this.index : vDom.attributes.index);
         }
-        utils_1.updateStylings(stylings, this.data, vDom.element);
-        utils_1.updateClasses(classes, this.data, vDom.element);
-        utils_1.updateAttributes(bindedAttrs, this.data, vDom.element);
-        for (var _i = 0, _a = vDom.children; _i < _a.length; _i++) {
-            var child = _a[_i];
-            var childElement = this.update(child, methods, once);
+        for (var _i = 0, _d = vDom.children; _i < _d.length; _i++) {
+            var child = _d[_i];
+            var childElement = this.update({ vDom: child, methods: methods, components: components, parent: vDom.element, once: once, styleId: styleId });
             if (once) {
                 if (childElement !== null) {
                     vDom.element.appendChild(childElement);
                 }
             }
+        }
+        if (isComponent)
+            return vDom.element;
+        var parsedText = parseString(vDom.originalText, this.heap);
+        if (parsedText !== vDom.text) {
+            vDom.element.textContent = parsedText;
         }
         return vDom.element;
     };
@@ -142,7 +201,7 @@ function parseString(str, data) {
         .map(function (_a) {
         var prop = _a[0], val = _a[1];
         return "let " + prop + "=" + (typeof val === "function"
-            ? "function " + val.toString() + ".bind(this)"
+            ? "''"
             : JSON.stringify(val)) + ";";
     })
         .join("");

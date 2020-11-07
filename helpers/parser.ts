@@ -24,6 +24,6 @@ export interface VirtualDomInterface {
     originalText: string,
     attributes: AttributesInterface,
     children: any[],
+    styleId: string,
     element: HTMLElement,
-    styleId: string
 }

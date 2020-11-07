@@ -8,9 +8,9 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 import { idCollector, Vytic } from "../vytic.js";
-import { addAttributes, addHandlers, deleteElement, insertElement, nextTick, updateAttributes, updateClasses, updateStylings } from "./utils.js";
+import { addAttributes, addCSS, addHandlers, deleteElement, generateId, insertElement, nextTick, uniqueStylesheet, updateAttributes, updateClasses, updateStylings } from "./utils.js";
 export class Reactivity {
-    constructor({ vDom, data, methods, components, parent, index }) {
+    constructor({ vDom, data, methods, components, parent, index, styleId }) {
         this.methods = methods;
         this.updating = false;
         this.components = components;
@@ -18,6 +18,7 @@ export class Reactivity {
         this.parent = parent;
         this.vDom = vDom;
         this.index = index;
+        this.styleId = styleId;
     }
     makeReactive() {
         let reactiveData = new Proxy(this.heap, this.proxyHandler());
@@ -38,7 +39,7 @@ export class Reactivity {
                     if (!this.updating) {
                         this.updating = true;
                         yield nextTick();
-                        this.update({ vDom: this.vDom, methods: this.methods, components: this.components, parent: this.parent, index: this.index });
+                        this.update({ vDom: this.vDom, methods: this.methods, components: this.components, parent: this.parent, index: this.index, styleId: this.styleId });
                         this.updating = false;
                     }
                     return true;
@@ -46,7 +47,7 @@ export class Reactivity {
             }.bind(this),
         };
     }
-    update({ vDom, methods, components, parent, once = false }) {
+    update({ vDom, methods, components, parent, once = false, styleId = "" }) {
         let isComponent = vDom.tag in components;
         let stylings = vDom.attributes.bindedStyle;
         let handlers = vDom.attributes.handlers;
@@ -60,16 +61,27 @@ export class Reactivity {
         }
         if (once) {
             if (vDom.tag in components) {
-                let vytic = new Vytic(Object.assign({ index: vDom.attributes.index, parent }, components[vDom.tag]));
+                if (vDom.tag in idCollector) {
+                    styleId = idCollector[vDom.tag];
+                }
+                else {
+                    if (components[vDom.tag].style) {
+                        let generatedId = generateId(5);
+                        idCollector[vDom.tag] = generatedId;
+                        styleId = generatedId;
+                        let scopedStyle = uniqueStylesheet(components[vDom.tag].style, styleId);
+                        addCSS(scopedStyle);
+                    }
+                }
+                let vytic = new Vytic(Object.assign({ styleId, index: vDom.attributes.index, parent }, components[vDom.tag]));
                 vDom.element = vytic.getReactiveElement();
                 isComponent = true;
-                if (vDom.tag in idCollector) {
-                    vDom.styleId = idCollector[vDom.tag];
-                    vDom.element.setAttribute(vDom.styleId, "");
-                }
             }
             else {
                 vDom.element = document.createElement(vDom.tag);
+            }
+            if (styleId) {
+                vDom.element.setAttribute(styleId, "");
             }
             if (showStat !== null) {
                 let value = !!parseString(showStat, this.heap);
@@ -92,7 +104,10 @@ export class Reactivity {
             if (value && !visible) {
                 vDom.attributes.visible = true;
                 if (vDom.tag in components) {
-                    let vytic = new Vytic(Object.assign({ index: vDom.attributes.index, parent }, components[vDom.tag]));
+                    if (vDom.tag in idCollector) {
+                        styleId = idCollector[vDom.tag];
+                    }
+                    let vytic = new Vytic(Object.assign({ styleId, index: vDom.attributes.index, parent }, components[vDom.tag]));
                     vDom.element = vytic.getReactiveElement();
                     isComponent = true;
                 }
@@ -111,7 +126,7 @@ export class Reactivity {
             insertElement(vDom.element, parent, this.index !== undefined ? this.index : vDom.attributes.index);
         }
         for (let child of vDom.children) {
-            let childElement = this.update({ vDom: child, methods, components, parent: vDom.element, once });
+            let childElement = this.update({ vDom: child, methods, components, parent: vDom.element, once, styleId });
             if (once) {
                 if (childElement !== null) {
                     vDom.element.appendChild(childElement);

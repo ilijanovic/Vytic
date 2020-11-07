@@ -16,7 +16,8 @@ import { parseStringToElement, nextTick, objectKeysToUppercase, looseRef, genera
  */
 class Vytic {
     root: Element | ShadowRoot
-    constructor({ root = null, data = {}, style = "", methods = {}, appendTo, ready, parent, components = {}, index }: InputProps) {
+    vDom: Object
+    constructor({ root = null, data = {}, styleId = undefined, methods = {}, appendTo, ready, parent, components = {}, index }: InputProps) {
         if (typeof root === "string") {
             root = parseStringToElement(root)
         } else if (!root) {
@@ -25,12 +26,12 @@ class Vytic {
         components = objectKeysToUppercase(components)
         methods = looseRef(methods)
         let oldRoot = root;
-        let styleId = generateId(15)
-        let scopedStyle = uniqueStylesheet(style, styleId)
-        let vDom = parseHTML(root, scopedStyle)
-        let reactivity = new Reactivity({ vDom, data, methods, components, parent, index })
+
+        let vDom = parseHTML(root, styleId)
+        this.vDom = vDom
+        let reactivity = new Reactivity({ vDom, data, methods, components, parent, index, styleId })
         let heap = reactivity.makeReactive()
-        let rootElement = reactivity.update({ vDom: reactivity.vDom, methods, components, parent, once: true })
+        let rootElement = reactivity.update({ vDom: reactivity.vDom, methods, components, parent, styleId, once: true })
         oldRoot.innerHTML = "";
         if (typeof ready === "function") {
             ready.call(heap)
@@ -49,8 +50,11 @@ class Vytic {
     public getReactiveElement(): any {
         return this.root
     }
+    public getVirtualDOM(): Object {
+        return this.vDom
+    }
 }
-
+export const idCollector: { [key: string]: string } = {}
 export interface WebComponentInterface {
     name: string,
     data: Object,
@@ -63,7 +67,8 @@ export interface ComponentInterface {
     root: Element,
     methods: MethodsInterface,
     ready?: Function,
-    components?: ComponentType
+    components?: ComponentType,
+    style: string,
 }
 export interface InputProps {
     root: Element,
@@ -73,7 +78,8 @@ export interface InputProps {
     ready?: Function,
     components?: ComponentType,
     parent?: Element,
-    index?: number
+    index?: number,
+    styleId: string
 }
 
 /**
@@ -105,7 +111,8 @@ function createWebComponent({ name, template, style = "", data = {}, methods = {
                 root: el,
                 data: { ...data },
                 methods: { ...methods },
-                appendTo: shadowRoot
+                appendTo: shadowRoot,
+                styleId: ""
             })
         };
 
