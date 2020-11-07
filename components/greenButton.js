@@ -1,10 +1,7 @@
-import redbutton from "./redButton.js";
-
 export default {
   root: `
       <div>
           <button @click="inc">Counter: {{counter}}</button>
-          <redbutton></redbutton>
       </div>
       `,
   data: {
@@ -24,7 +21,4 @@ export default {
           border: none
       }
     `,
-  components: {
-    redbutton,
-  },
 };

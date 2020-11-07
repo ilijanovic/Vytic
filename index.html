@@ -3,20 +3,7 @@
 
 <body>
   <div id="root">
-    <button @click="toggle">Toggle</button>
     <redbutton></redbutton>
-
-    <redbutton></redbutton>
-
-    <redbutton></redbutton>
-
-    <redbutton if="visible"></redbutton>
-    <greenbutton></greenbutton>
-
-    <greenbutton></greenbutton>
-
-    <greenbutton if="visible"></greenbutton>
-
     <greenbutton></greenbutton>
   </div>
 </body>
@@ -26,15 +13,6 @@
   import greenbutton from "./components/greenButton.js"
   new Vytic({
     root: document.getElementById("root"),
-    components: {},
-    data: {
-      visible: true
-    },
-    methods: {
-      toggle() {
-        this.visible = !this.visible
-      }
-    },
     components: {
       redbutton,
       greenbutton
