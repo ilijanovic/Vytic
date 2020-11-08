@@ -200,6 +200,15 @@ Inside of your `custombutton` component you can use `<slot>`. The passed element
 
 Note here: Slots works currently only for elements. That means `<custombutton>Text</custombutton>` wont work. You will need to wrap it in an element like `<custombutton><p>Text</p></custombutton>`
 
+You can use multiple elements like:
+
+    <custombutton>
+        <p>Text 1</p>
+        <p>Text 2</p>
+    </custombutton>
+
+Things like `if` or interpolation `{{ }}` still works.
+
 ## Create native web components
 
 Vytic provides `createWebComponent` function that creates an reactive native web component.

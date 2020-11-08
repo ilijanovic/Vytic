@@ -8,13 +8,16 @@ import { collectAttributes, formatText } from "../helpers/utils.js";
  */
 export function parseHTML(html, styleId) {
     var _a;
+    let { text, staticNode } = formatText((_a = html.childNodes[0]) === null || _a === void 0 ? void 0 : _a.nodeValue);
     return {
         tag: html.tagName,
         text: "",
         styleId,
-        originalText: formatText((_a = html.childNodes[0]) === null || _a === void 0 ? void 0 : _a.nodeValue),
+        originalText: text,
         element: null,
+        staticNode,
         children: Array.from(html.children).map(child => parseHTML(child, styleId)),
-        attributes: collectAttributes(html)
+        attributes: collectAttributes(html),
+        componentData: {},
     };
 }

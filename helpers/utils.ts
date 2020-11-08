@@ -12,7 +12,7 @@ export function collectAttributes(element: Element): AttributesInterface {
     return Array.from(element.attributes, ({ name, value }) => [
         name,
         value,
-    ]).reduce((a, [key, val]) => {
+    ]).reduce((a: AttributesInterface, [key, val]) => {
         if (key.includes("@")) {
             let handlerName = key.replace("@", "")
             a.handlers.push([handlerName, val])
@@ -27,6 +27,9 @@ export function collectAttributes(element: Element): AttributesInterface {
             a.bindedAttr.push([attributeProp, val])
         } else if (key === "if") {
             a.show = val
+        } else if (key.startsWith("p:")) {
+            let prop = key.replace("p:", "");
+            a.props[prop] = val
         } else {
             a.attr.push([key, val])
         }
@@ -39,6 +42,7 @@ export function collectAttributes(element: Element): AttributesInterface {
         bindedClasses: [],
         show: null,
         visible: true,
+        props: {},
         parent: element.parentElement,
         index: element.parentElement ? Array.prototype.indexOf.call(element.parentElement.children, element) : 0
     })
@@ -52,28 +56,39 @@ export interface AttributesInterface {
     show: string,
     visible: Boolean,
     parent: HTMLElement,
-    index: number
+    index: number,
+    props: { [key: string]: string }
 }
 
+interface StaticInterface {
+    staticNode: Boolean,
+    text: string
+}
 /**
  * Formats an string that it can be parsed later with "parseString"
  * 
  * @param {String} text - String that needs to be formatted
  * @returns {string} - Returns formatted string
  */
-export function formatText(text: String): string {
+export function formatText(text: String): StaticInterface {
     if (!text)
-        return "";
+        return {
+            staticNode: true,
+            text: ""
+        }
 
     let expressions = text?.match(/({{)(.*?)(}})/g);
     if (!expressions)
-        return '"' + text.replace(/\n/g, "").trim() + '"';
+        return { text: text.replace(/\n/g, "").trim(), staticNode: true }
 
     expressions.forEach((exp) => {
         let varname = exp.match(/(?<={{)(.*?)(?=}})/)[0].trim();
         text = '"' + text.replace(exp, `" + ${varname} +"`) + '"';
     });
-    return text.replace(/\n/g, "")
+    return {
+        text: text.replace(/\n/g, ""),
+        staticNode: false
+    }
 }
 
 /**
@@ -260,8 +275,18 @@ export function getPosition(element: HTMLElement, parent: HTMLElement | Element 
 export function updateChildrens(vDom: VirtualDomInterface): void {
     vDom.children.forEach((child: VirtualDomInterface) => {
         if (child.attributes.visible) {
-            insertElement(child.element, vDom.element, child.attributes.index)
-
+            if (getPosition(child.element, vDom.element) !== child.attributes.index) {
+                insertElement(child.element, vDom.element, child.attributes.index)
+            }
         }
     })
+}
+
+export function updateProps(props: { [key: string]: string }, componentData: { [key: string]: string }, heap: Object): void {
+    for (let key in props) {
+        componentData[key] = parseString(props[key], heap)
+
+    }
+    console.log(props)
+
 }

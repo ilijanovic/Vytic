@@ -18,7 +18,7 @@ var __spreadArrays = (this && this.__spreadArrays) || function () {
     return r;
 };
 exports.__esModule = true;
-exports.updateChildrens = exports.getPosition = exports.uniqueStylesheet = exports.addCSS = exports.generateId = exports.looseRef = exports.objectKeysToUppercase = exports.updateAttributes = exports.updateStylings = exports.updateClasses = exports.addAttributes = exports.addHandlers = exports.nextTick = exports.insertElement = exports.deleteElement = exports.parseStringToElement = exports.formatText = exports.collectAttributes = void 0;
+exports.updateProps = exports.updateChildrens = exports.getPosition = exports.uniqueStylesheet = exports.addCSS = exports.generateId = exports.looseRef = exports.objectKeysToUppercase = exports.updateAttributes = exports.updateStylings = exports.updateClasses = exports.addAttributes = exports.addHandlers = exports.nextTick = exports.insertElement = exports.deleteElement = exports.parseStringToElement = exports.formatText = exports.collectAttributes = void 0;
 var reactivity_1 = require("./reactivity");
 /**
  * Collects all attributes from an element.
@@ -54,6 +54,10 @@ function collectAttributes(element) {
         else if (key === "if") {
             a.show = val;
         }
+        else if (key.startsWith("p:")) {
+            var prop = key.replace("p:", "");
+            a.props[prop] = val;
+        }
         else {
             a.attr.push([key, val]);
         }
@@ -66,6 +70,7 @@ function collectAttributes(element) {
         bindedClasses: [],
         show: null,
         visible: true,
+        props: {},
         parent: element.parentElement,
         index: element.parentElement ? Array.prototype.indexOf.call(element.parentElement.children, element) : 0
     });
@@ -79,15 +84,21 @@ exports.collectAttributes = collectAttributes;
  */
 function formatText(text) {
     if (!text)
-        return "";
+        return {
+            staticNode: true,
+            text: ""
+        };
     var expressions = text === null || text === void 0 ? void 0 : text.match(/({{)(.*?)(}})/g);
     if (!expressions)
-        return '"' + text.replace(/\n/g, "").trim() + '"';
+        return { text: text.replace(/\n/g, "").trim(), staticNode: true };
     expressions.forEach(function (exp) {
         var varname = exp.match(/(?<={{)(.*?)(?=}})/)[0].trim();
         text = '"' + text.replace(exp, "\" + " + varname + " +\"") + '"';
     });
-    return text.replace(/\n/g, "");
+    return {
+        text: text.replace(/\n/g, ""),
+        staticNode: false
+    };
 }
 exports.formatText = formatText;
 /**
@@ -283,8 +294,17 @@ exports.getPosition = getPosition;
 function updateChildrens(vDom) {
     vDom.children.forEach(function (child) {
         if (child.attributes.visible) {
-            insertElement(child.element, vDom.element, child.attributes.index);
+            if (getPosition(child.element, vDom.element) !== child.attributes.index) {
+                insertElement(child.element, vDom.element, child.attributes.index);
+            }
         }
     });
 }
 exports.updateChildrens = updateChildrens;
+function updateProps(props, componentData, heap) {
+    for (var key in props) {
+        componentData[key] = reactivity_1.parseString(props[key], heap);
+    }
+    console.log(props);
+}
+exports.updateProps = updateProps;

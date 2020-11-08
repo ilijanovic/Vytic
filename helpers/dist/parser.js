@@ -11,14 +11,17 @@ var utils_1 = require("../helpers/utils");
  */
 function parseHTML(html, styleId) {
     var _a;
+    var _b = utils_1.formatText((_a = html.childNodes[0]) === null || _a === void 0 ? void 0 : _a.nodeValue), text = _b.text, staticNode = _b.staticNode;
     return {
         tag: html.tagName,
         text: "",
         styleId: styleId,
-        originalText: utils_1.formatText((_a = html.childNodes[0]) === null || _a === void 0 ? void 0 : _a.nodeValue),
+        originalText: text,
         element: null,
+        staticNode: staticNode,
         children: Array.from(html.children).map(function (child) { return parseHTML(child, styleId); }),
-        attributes: utils_1.collectAttributes(html)
+        attributes: utils_1.collectAttributes(html),
+        componentData: {}
     };
 }
 exports.parseHTML = parseHTML;

@@ -8,15 +8,17 @@ import { AttributesInterface, collectAttributes, formatText } from "../helpers/u
  * @returns {Object} - Returns virtual DOM representation of the element 
  */
 export function parseHTML(html: Element, styleId: string): VirtualDomInterface {
+    let { text, staticNode } = formatText(html.childNodes[0]?.nodeValue)
     return {
         tag: html.tagName,
         text: "",
         styleId,
-        originalText: formatText(html.childNodes[0]?.nodeValue),
+        originalText: text,
         element: null,
-
+        staticNode,
         children: Array.from(html.children).map(child => parseHTML(child, styleId)),
-        attributes: collectAttributes(html)
+        attributes: collectAttributes(html),
+        componentData: {},
     }
 }
 export interface VirtualDomInterface {
@@ -27,4 +29,6 @@ export interface VirtualDomInterface {
     children: any[],
     styleId: string,
     element: HTMLElement,
+    staticNode: Boolean,
+    componentData: { [key: string]: any }
 }

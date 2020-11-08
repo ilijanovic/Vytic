@@ -29,6 +29,10 @@ export function collectAttributes(element) {
         else if (key === "if") {
             a.show = val;
         }
+        else if (key.startsWith("p:")) {
+            let prop = key.replace("p:", "");
+            a.props[prop] = val;
+        }
         else {
             a.attr.push([key, val]);
         }
@@ -41,6 +45,7 @@ export function collectAttributes(element) {
         bindedClasses: [],
         show: null,
         visible: true,
+        props: {},
         parent: element.parentElement,
         index: element.parentElement ? Array.prototype.indexOf.call(element.parentElement.children, element) : 0
     });
@@ -53,15 +58,21 @@ export function collectAttributes(element) {
  */
 export function formatText(text) {
     if (!text)
-        return "";
+        return {
+            staticNode: true,
+            text: ""
+        };
     let expressions = text === null || text === void 0 ? void 0 : text.match(/({{)(.*?)(}})/g);
     if (!expressions)
-        return '"' + text.replace(/\n/g, "").trim() + '"';
+        return { text: text.replace(/\n/g, "").trim(), staticNode: true };
     expressions.forEach((exp) => {
         let varname = exp.match(/(?<={{)(.*?)(?=}})/)[0].trim();
         text = '"' + text.replace(exp, `" + ${varname} +"`) + '"';
     });
-    return text.replace(/\n/g, "");
+    return {
+        text: text.replace(/\n/g, ""),
+        staticNode: false
+    };
 }
 /**
  *  Parses an string to an element
@@ -234,7 +245,15 @@ export function getPosition(element, parent = null) {
 export function updateChildrens(vDom) {
     vDom.children.forEach((child) => {
         if (child.attributes.visible) {
-            insertElement(child.element, vDom.element, child.attributes.index);
+            if (getPosition(child.element, vDom.element) !== child.attributes.index) {
+                insertElement(child.element, vDom.element, child.attributes.index);
+            }
         }
     });
+}
+export function updateProps(props, componentData, heap) {
+    for (let key in props) {
+        componentData[key] = parseString(props[key], heap);
+    }
+    console.log(props);
 }

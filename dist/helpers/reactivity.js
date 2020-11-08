@@ -8,18 +8,19 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 import { idCollector, Vytic } from "../vytic.js";
-import { addAttributes, addCSS, addHandlers, deleteElement, generateId, insertElement, nextTick, uniqueStylesheet, updateAttributes, updateChildrens, updateClasses, updateStylings } from "./utils.js";
+import { addAttributes, addCSS, addHandlers, deleteElement, generateId, insertElement, nextTick, uniqueStylesheet, updateAttributes, updateChildrens, updateClasses, updateProps, updateStylings } from "./utils.js";
 export class Reactivity {
-    constructor({ vDom, slots, data, methods, components, parent, index, styleId }) {
+    constructor({ vDom, slots, data, methods, components, parent, index, styleId, props }) {
         this.methods = methods;
         this.updating = false;
         this.components = components;
-        this.heap = Object.assign(Object.assign({}, data), this.methods);
+        this.heap = Object.assign(Object.assign(Object.assign({}, data), this.methods), props);
         this.parent = parent;
         this.vDom = vDom;
         this.index = index;
         this.styleId = styleId;
         this.slots = slots;
+        this.props = props;
     }
     makeReactive() {
         let reactiveData = new Proxy(this.heap, this.proxyHandler());
@@ -32,6 +33,9 @@ export class Reactivity {
     proxyHandler() {
         return {
             get: function (obj, prop) {
+                if (["[object Object]", "[object Array]"].indexOf(Object.prototype.toString.call(obj[prop])) > -1) {
+                    return new Proxy(obj[prop], this.proxyHandler());
+                }
                 return obj[prop];
             }.bind(this),
             set: function (obj, prop, newVal) {
@@ -91,8 +95,9 @@ export class Reactivity {
                     }
                 }
                 let slotElements = vDom.children.map(child => this.update({ vDom: child, styleId, parent, once, components, methods }));
-                let vytic = new Vytic(Object.assign({ slots: slotElements, styleId, index: vDom.attributes.index, parent }, components[vDom.tag]));
+                let vytic = new Vytic(Object.assign({ props: this.props, slots: slotElements, styleId, index: vDom.attributes.index, parent }, components[vDom.tag]));
                 vDom.element = vytic.getReactiveElement();
+                vDom.componentData = vytic.getReactiveData();
                 isComponent = true;
             }
             else {
@@ -116,6 +121,7 @@ export class Reactivity {
             let value = !!parseString(showStat, this.heap);
             if (!value && visible) {
                 deleteElement(vDom.element);
+                vDom.text = "";
                 vDom.attributes.visible = false;
                 return;
             }
@@ -125,12 +131,18 @@ export class Reactivity {
                     if (vDom.tag in idCollector) {
                         styleId = idCollector[vDom.tag];
                     }
-                    let vytic = new Vytic(Object.assign({ styleId, index: vDom.attributes.index, parent }, components[vDom.tag]));
+                    let vytic = new Vytic(Object.assign({ props: this.props, styleId, index: vDom.attributes.index, parent }, components[vDom.tag]));
                     vDom.element = vytic.getReactiveElement();
+                    vDom.componentData = vytic.getReactiveData();
                     isComponent = true;
                 }
                 else {
                     vDom.element = document.createElement(vDom.tag);
+                }
+                if (vDom.staticNode) {
+                    if (vDom.originalText) {
+                        vDom.element.textContent = vDom.originalText;
+                    }
                 }
                 addHandlers(handlers, methods, vDom.element, this.heap);
                 addAttributes(attrs, vDom.element);
@@ -140,8 +152,7 @@ export class Reactivity {
         updateStylings(stylings, this.heap, vDom.element);
         updateClasses(classes, this.heap, vDom.element);
         updateAttributes(bindedAttrs, this.heap, vDom.element);
-        if (vDom.attributes.visible) {
-        }
+        updateProps(vDom.attributes.props, vDom.componentData, this.heap);
         if (isComponent) {
             for (let child of vDom.children) {
                 this.update({ vDom: child, methods, components, parent: vDom.element, once: false, styleId });
@@ -157,9 +168,17 @@ export class Reactivity {
                 }
             }
         }
-        let parsedText = parseString(vDom.originalText, this.heap);
-        if (parsedText !== vDom.text) {
-            vDom.element.textContent = parsedText;
+        if (!vDom.staticNode) {
+            let parsedText = parseString(vDom.originalText, this.heap);
+            if (parsedText !== vDom.text) {
+                vDom.element.textContent = parsedText;
+                vDom.text = parsedText;
+            }
+        }
+        else {
+            if (vDom.originalText && once) {
+                vDom.element.textContent = vDom.originalText;
+            }
         }
         return vDom.element;
     }

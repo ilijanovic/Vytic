@@ -18,7 +18,7 @@ class Vytic {
     root: Element | ShadowRoot
     vDom: Object
     reactiveData: Object
-    constructor({ root = null, data = {}, slots, styleId = undefined, methods = {}, appendTo, ready, parent, components = {}, index }: InputProps) {
+    constructor({ root = null, data = {}, props = {}, slots, styleId = undefined, methods = {}, appendTo, ready, parent, components = {}, index }: InputProps) {
         if (typeof root === "string") {
             root = parseStringToElement(root)
         } else if (!root) {
@@ -30,7 +30,7 @@ class Vytic {
 
         let vDom = parseHTML(root, styleId)
         this.vDom = vDom
-        let reactivity = new Reactivity({ vDom, data, methods, components, parent, index, styleId, slots })
+        let reactivity = new Reactivity({ props, vDom, data, methods, components, parent, index, styleId, slots })
         let heap = reactivity.makeReactive()
         this.reactiveData = heap;
         let rootElement = reactivity.update({ vDom: reactivity.vDom, methods, components, parent, styleId, once: true })
@@ -86,7 +86,8 @@ export interface InputProps {
     parent?: Element,
     index?: number,
     styleId: string,
-    slots?: Element[]
+    slots?: Element[],
+    props?: { [key: string]: any }
 }
 
 /**
