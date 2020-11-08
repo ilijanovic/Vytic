@@ -243,6 +243,35 @@ Because they are native components you dont need to wrap them inside an root ele
         })
     </script>
 
+## Props
+
+You are able to pass props down to the component with the prop bindin `p:`
+
+    <somecomponent p:propname="propvalue"></somecomponent>
+
+    <script type="module">
+    new Vytic({
+        root: document.getElementById("root"),
+        data: {
+            propvalue: 0
+        }
+        components: {
+            somecomponent
+        }
+    })
+    </script>
+
+In your component you need to register the props with the object `prop`
+
+    export default {
+    root: "<p>Value: {{propvalue}}",
+    props: {
+        propvalue: {
+        type: Number,
+        },
+    },
+    };
+
 ## View Virtual DOM
 
 You can take a look how the Vytic virtual DOM looks like:
