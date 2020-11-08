@@ -1,4 +1,5 @@
 
+import { VirtualDomInterface } from "./parser"
 import { ComponentType, MethodsInterface, parseString } from "./reactivity"
 
 /**
@@ -253,4 +254,14 @@ export function uniqueStylesheet(style: string, id: string): string {
 export function getPosition(element: HTMLElement, parent: HTMLElement | Element = null): number {
     if (!parent) return [...element.parentElement.children].indexOf(element);
     return [...parent.children].indexOf(element)
+}
+
+
+export function updateChildrens(vDom: VirtualDomInterface): void {
+    vDom.children.forEach((child: VirtualDomInterface) => {
+        if (child.attributes.visible) {
+            insertElement(child.element, vDom.element, child.attributes.index)
+
+        }
+    })
 }

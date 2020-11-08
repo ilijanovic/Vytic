@@ -231,3 +231,10 @@ export function getPosition(element, parent = null) {
         return [...element.parentElement.children].indexOf(element);
     return [...parent.children].indexOf(element);
 }
+export function updateChildrens(vDom) {
+    vDom.children.forEach((child) => {
+        if (child.attributes.visible) {
+            insertElement(child.element, vDom.element, child.attributes.index);
+        }
+    });
+}

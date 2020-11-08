@@ -14,6 +14,7 @@ export function parseHTML(html: Element, styleId: string): VirtualDomInterface {
         styleId,
         originalText: formatText(html.childNodes[0]?.nodeValue),
         element: null,
+
         children: Array.from(html.children).map(child => parseHTML(child, styleId)),
         attributes: collectAttributes(html)
     }

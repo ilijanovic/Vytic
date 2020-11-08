@@ -18,7 +18,7 @@ var __spreadArrays = (this && this.__spreadArrays) || function () {
     return r;
 };
 exports.__esModule = true;
-exports.getPosition = exports.uniqueStylesheet = exports.addCSS = exports.generateId = exports.looseRef = exports.objectKeysToUppercase = exports.updateAttributes = exports.updateStylings = exports.updateClasses = exports.addAttributes = exports.addHandlers = exports.nextTick = exports.insertElement = exports.deleteElement = exports.parseStringToElement = exports.formatText = exports.collectAttributes = void 0;
+exports.updateChildrens = exports.getPosition = exports.uniqueStylesheet = exports.addCSS = exports.generateId = exports.looseRef = exports.objectKeysToUppercase = exports.updateAttributes = exports.updateStylings = exports.updateClasses = exports.addAttributes = exports.addHandlers = exports.nextTick = exports.insertElement = exports.deleteElement = exports.parseStringToElement = exports.formatText = exports.collectAttributes = void 0;
 var reactivity_1 = require("./reactivity");
 /**
  * Collects all attributes from an element.
@@ -280,3 +280,11 @@ function getPosition(element, parent) {
     return __spreadArrays(parent.children).indexOf(element);
 }
 exports.getPosition = getPosition;
+function updateChildrens(vDom) {
+    vDom.children.forEach(function (child) {
+        if (child.attributes.visible) {
+            insertElement(child.element, vDom.element, child.attributes.index);
+        }
+    });
+}
+exports.updateChildrens = updateChildrens;

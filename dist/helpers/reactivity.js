@@ -8,9 +8,9 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 import { idCollector, Vytic } from "../vytic.js";
-import { addAttributes, addCSS, addHandlers, deleteElement, generateId, getPosition, insertElement, nextTick, uniqueStylesheet, updateAttributes, updateClasses, updateStylings } from "./utils.js";
+import { addAttributes, addCSS, addHandlers, deleteElement, generateId, insertElement, nextTick, uniqueStylesheet, updateAttributes, updateChildrens, updateClasses, updateStylings } from "./utils.js";
 export class Reactivity {
-    constructor({ vDom, data, methods, components, parent, index, styleId }) {
+    constructor({ vDom, slots, data, methods, components, parent, index, styleId }) {
         this.methods = methods;
         this.updating = false;
         this.components = components;
@@ -19,6 +19,7 @@ export class Reactivity {
         this.vDom = vDom;
         this.index = index;
         this.styleId = styleId;
+        this.slots = slots;
     }
     makeReactive() {
         let reactiveData = new Proxy(this.heap, this.proxyHandler());
@@ -40,6 +41,7 @@ export class Reactivity {
                         this.updating = true;
                         yield nextTick();
                         this.update({ vDom: this.vDom, methods: this.methods, components: this.components, parent: this.parent, index: this.index, styleId: this.styleId });
+                        updateChildrens(this.vDom);
                         this.updating = false;
                     }
                     return true;
@@ -48,6 +50,14 @@ export class Reactivity {
         };
     }
     update({ vDom, methods, components, parent, once = false, styleId = "" }) {
+        if (vDom.tag === "SLOT") {
+            this.slots.forEach(slotChild => {
+                if (slotChild) {
+                    parent.append(slotChild);
+                }
+            });
+            return;
+        }
         let isComponent = vDom.tag in components;
         let stylings = vDom.attributes.bindedStyle;
         let handlers = vDom.attributes.handlers;
@@ -80,7 +90,8 @@ export class Reactivity {
                         return null;
                     }
                 }
-                let vytic = new Vytic(Object.assign({ styleId, index: vDom.attributes.index, parent }, components[vDom.tag]));
+                let slotElements = vDom.children.map(child => this.update({ vDom: child, styleId, parent, once, components, methods }));
+                let vytic = new Vytic(Object.assign({ slots: slotElements, styleId, index: vDom.attributes.index, parent }, components[vDom.tag]));
                 vDom.element = vytic.getReactiveElement();
                 isComponent = true;
             }
@@ -123,28 +134,29 @@ export class Reactivity {
                 }
                 addHandlers(handlers, methods, vDom.element, this.heap);
                 addAttributes(attrs, vDom.element);
-                insertElement(vDom.element, parent, this.index !== undefined ? this.index : vDom.attributes.index);
+                insertElement(vDom.element, parent, vDom.attributes.index);
             }
         }
         updateStylings(stylings, this.heap, vDom.element);
         updateClasses(classes, this.heap, vDom.element);
         updateAttributes(bindedAttrs, this.heap, vDom.element);
         if (vDom.attributes.visible) {
-            let index = this.index !== undefined ? this.index : vDom.attributes.index;
-            if (getPosition(vDom.element, parent) !== index) {
-                insertElement(vDom.element, parent, index);
-            }
         }
-        for (let child of vDom.children) {
-            let childElement = this.update({ vDom: child, methods, components, parent: vDom.element, once, styleId });
-            if (once) {
-                if (childElement !== null) {
-                    vDom.element.appendChild(childElement);
-                }
+        if (isComponent) {
+            for (let child of vDom.children) {
+                this.update({ vDom: child, methods, components, parent: vDom.element, once: false, styleId });
             }
         }
         if (isComponent)
             return vDom.element;
+        for (let child of vDom.children) {
+            let childElement = this.update({ vDom: child, methods, components, parent: vDom.element, once, styleId });
+            if (once) {
+                if (childElement) {
+                    vDom.element.appendChild(childElement);
+                }
+            }
+        }
         let parsedText = parseString(vDom.originalText, this.heap);
         if (parsedText !== vDom.text) {
             vDom.element.textContent = parsedText;

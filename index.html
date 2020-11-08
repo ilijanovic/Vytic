@@ -3,25 +3,55 @@
 
 <body>
   <div id="root">
+    <navigation></navigation>
     <sidebar if="visible"></sidebar>
+    <p> {{visible}}</p>
     <button s:width="'500px'" style="display: flex; margin-left: auto" @click="open">Toggle sidebar</button>
+    <button @click="inc1">1</button>
+    <button @click="inc2">2</button>
+    <button @click="inc3">3</button>
+    <button @click="inc4">4</button>
+    <p if="vis1">1</p>
+    <p if="vis2">2</p>
+    <p if="vis3">3</p>
+    <p if="vis4">4</p>
   </div>
 </body>
 <script type="module">
   import { Vytic } from "./dist/vytic.js";
   import sidebar from "./components/sidebar.js"
+  import navigation from "./components/navigation.js"
   let vytic = new Vytic({
     root: document.getElementById("root"),
     data: {
-      visible: false
+      visible: false,
+      vis1: true,
+      vis2: true,
+      vis3: true,
+      vis4: true
     },
     methods: {
+      inc1() {
+        this.vis1 = !this.vis1
+      },
+      inc2() {
+
+        this.vis2 = !this.vis2
+      },
+      inc3() {
+
+        this.vis3 = !this.vis3
+      },
+      inc4() {
+
+        this.vis4 = !this.vis4
+      },
       open() {
         this.visible = !this.visible
       }
     },
     components: {
-      sidebar
+      sidebar, navigation
     },
   });
 
