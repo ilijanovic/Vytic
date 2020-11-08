@@ -2,6 +2,8 @@
 
 Super small reactive framework build with typescript. It compiles the HTML markup down to an virtual DOM and tracks it for changes.
 
+This project is inspired by Vue.js. Therefor you will see similar syntax.
+
 ## How to run it
 
 Install dependencies:
@@ -181,6 +183,22 @@ You need to register your component in your Vytic instance:
     </script>
 
 The styling in your component is by default scoped.
+
+## Slots
+
+You can use slots inside components.
+
+    <custombutton>
+        <p>Toggle</p>
+    </custombutton>
+
+Inside of your `custombutton` component you can use `<slot>`. The passed elements will be replaced with the `<slot>`
+
+    <button>
+       <slot></slot>
+    </button>
+
+Note here: Slots works currently only for elements. That means `<custombutton>Text</custombutton>` wont work. You will need to wrap it in an element like `<custombutton><p>Text</p></custombutton>`
 
 ## Create native web components
 

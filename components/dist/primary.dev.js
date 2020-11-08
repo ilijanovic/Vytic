@@ -9,7 +9,7 @@ var _vytic = require("../dist/vytic.js");
 
 var root =
 /*html */
-"\n    <button>\n    <slot></slot>\n    </button>\n";
+"\n    <button>\n    <div>\n        <slot></slot>\n    </div>\n    </button>\n";
 var style =
 /*css */
 "\n    button {\n        background: red;\n        padding: 10px;\n        color: white;\n        border-radius: 6px;\n        border: none;\n        cursor: pointer;\n    }\n";

@@ -1,7 +1,9 @@
 import { nextTick } from "../dist/vytic.js";
 let root = /*html */ `
     <button>
-    <slot></slot>
+    <div>
+        <slot></slot>
+    </div>
     </button>
 `;
 let style = /*css */ `
