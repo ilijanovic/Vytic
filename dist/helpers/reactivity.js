@@ -160,6 +160,8 @@ export class Reactivity {
         }
         if (isComponent)
             return vDom.element;
+        if (!vDom.attributes.visible)
+            return vDom.element;
         for (let child of vDom.children) {
             let childElement = this.update({ vDom: child, methods, components, parent: vDom.element, once, styleId });
             if (once) {

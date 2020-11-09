@@ -2,21 +2,16 @@
 <html lang="en">
   <body>
     <div id="root">
-      <button @click="inc(this.counter)">Increase</button>
-      <p>Counter: {{counter}}</p>
+      <app></app>
     </div>
   </body>
   <script type="module">
     import { Vytic } from "./dist/vytic.js";
+    import app from "./app.js";
     let vytic = new Vytic({
       root: document.getElementById("root"),
-      data: {
-        counter: 1,
-      },
-      methods: {
-        inc(c) {
-          this.counter += c;
-        },
+      components: {
+        app,
       },
     });
   </script>

@@ -1,6 +1,15 @@
 # Vytic
 
 Super small reactive framework build with typescript. It compiles the HTML markup down to an virtual DOM and tracks it for changes.
+Under the hood Vytic uses Javascript proxies. Thats the heart of the application that makes data reactive and magically updates the DOM.
+
+As soon as you change your `data` the proxy intercepts this operation and traverse with a recursive update function through the Virtual DOM to check if something changed and updates the real DOM if there is an change.
+
+Depending where you changed your data Vytic will only scan this particular DOM. For example if you have an sidebar component and some data changed in the sidebar component only the Virtual DOM of the sidebar will be scanned witch makes the updates pretty fast. There is currently one exception: If you pass props to another component then both components will be scanned since every component has an own proxy object.
+
+Current size is: < 25kb
+
+Its quite big because compilers / parsers are included here. Usually the project is compiled / parsed AOT so that Vytic just needs to render the generated VDOM structure. Upgrades will come in the future...
 
 This project is inspired by Vue.js. Therefor you will see similar syntax.
 
@@ -146,6 +155,8 @@ There are currently 3 ways to update the data with an event handler:
 
 3. Pass in an method with an argument: `@click="myMethod(this.counter)"`
    The method does not need `this` only the data
+
+I am working on it to be able to mutate the data without the need of `this`
 
 ## Create Vytic components
 

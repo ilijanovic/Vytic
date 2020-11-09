@@ -214,7 +214,7 @@ export function generateId(length) {
     for (var i = 0; i < length; i++) {
         result += characters.charAt(Math.floor(Math.random() * charactersLength));
     }
-    return `vytic - id - ${result} `;
+    return `vytic-id-${result}`;
 }
 /**
  *
@@ -242,8 +242,8 @@ export function uniqueStylesheet(style, id) {
 }
 export function getPosition(element, parent = null) {
     if (!parent)
-        return [...element.parentElement.children].indexOf(element);
-    return [...parent.children].indexOf(element);
+        return Array.from(element.parentElement.children).indexOf(element);
+    return Array.from(parent.children).indexOf(element);
 }
 export function updateChildrens(vDom) {
     vDom.children.forEach((child) => {

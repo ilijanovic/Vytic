@@ -242,7 +242,7 @@ export function generateId(length: number): string {
     for (var i = 0; i < length; i++) {
         result += characters.charAt(Math.floor(Math.random() * charactersLength));
     }
-    return `vytic - id - ${result} `;
+    return `vytic-id-${result}`;
 }
 
 /**
@@ -272,8 +272,8 @@ export function uniqueStylesheet(style: string, id: string): string {
 }
 
 export function getPosition(element: HTMLElement, parent: HTMLElement | Element = null): number {
-    if (!parent) return [...element.parentElement.children].indexOf(element);
-    return [...parent.children].indexOf(element)
+    if (!parent) return Array.from(element.parentElement.children).indexOf(element);
+    return Array.from(parent.children).indexOf(element)
 }
 
 
