@@ -1,34 +1,28 @@
 <!DOCTYPE html>
 <html lang="en">
-
-<body>
-  <div id="root">
-    <sidebar p:counter="counter"></sidebar>
-    <button @click="inc">Increase</button>
-  </div>
-</body>
-<script type="module">
-  import { Vytic } from "./dist/vytic.js";
-  import sidebar from "./components/sidebar.js"
-  let vytic = new Vytic({
-    root: document.getElementById("root"),
-    data: {
-      counter: 0
-    },
-    methods: {
-      inc() {
-        this.counter++
-      }
-    },
-    components: {
-      sidebar
-    },
-  });
-</script>
-<style>
-  * {
-    margin: 0 auto
-  }
-</style>
-
+  <body>
+    <div id="root">
+      <button @click="counter++">Increase</button>
+      <p>Counter: {{counter}}</p>
+    </div>
+  </body>
+  <script type="module">
+    import { Vytic } from "./dist/vytic.js";
+    let vytic = new Vytic({
+      root: document.getElementById("root"),
+      data: {
+        counter: 0,
+      },
+      methods: {
+        inc() {
+          console.log(this);
+        },
+      },
+    });
+  </script>
+  <style>
+    * {
+      margin: 0 auto;
+    }
+  </style>
 </html>

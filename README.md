@@ -264,10 +264,10 @@ You are able to pass props down to the component with the prop bindin `p:`
 In your component you need to register the props with the object `prop`
 
     export default {
-    root: "<p>Value: {{propvalue}}",
+    root: "<p>Value: {{propname}}",
     props: {
-        propvalue: {
-        type: Number,
+        propname: {
+            type: Number,
         },
     },
     };

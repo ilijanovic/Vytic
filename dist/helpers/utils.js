@@ -123,8 +123,10 @@ export function nextTick() {
 export function addHandlers(handlers, methods, element, heap) {
     handlers.forEach(([handler, method]) => {
         element.addEventListener(handler, typeof methods[method] === "function" ? methods[method] : () => {
-            //TODO: Add handler for non functions
-        });
+            let objectKeyNames = Object.keys(heap).toString();
+            let result = new Function(`let { ${objectKeyNames} } = this;   ${method};  return {${objectKeyNames}}`).call(heap);
+            Object.assign(heap, result);
+        }, { passive: true });
     });
 }
 /**
@@ -212,7 +214,7 @@ export function generateId(length) {
     for (var i = 0; i < length; i++) {
         result += characters.charAt(Math.floor(Math.random() * charactersLength));
     }
-    return `vytic-id-${result}`;
+    return `vytic - id - ${result} `;
 }
 /**
  *
@@ -234,7 +236,8 @@ export function addCSS(style) {
  */
 export function uniqueStylesheet(style, id) {
     id = id.toLowerCase();
-    let newStyle = style.replace(/\s+{|{/g, `[${id}] {`);
+    let newStyle = style.replace(/\s+{|{/g, `[${id}] {
+        `);
     return newStyle;
 }
 export function getPosition(element, parent = null) {
@@ -255,5 +258,4 @@ export function updateProps(props, componentData, heap) {
     for (let key in props) {
         componentData[key] = parseString(props[key], heap);
     }
-    console.log(props);
 }

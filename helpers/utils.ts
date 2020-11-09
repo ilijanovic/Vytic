@@ -145,10 +145,15 @@ export function nextTick(): Promise<number> {
 export function addHandlers(handlers: string[][], methods: MethodsInterface, element: Element, heap: Object): void {
     handlers.forEach(([handler, method]) => {
         element.addEventListener(handler, typeof methods[method] === "function" ? methods[method] : () => {
-            //TODO: Add handler for non functions
-        })
+            let objectKeyNames = Object.keys(heap).toString()
+
+            let result = new Function(`let { ${objectKeyNames} } = this;   ${method};  return {${objectKeyNames}}`).call(heap)
+            Object.assign(heap, result)
+        }, { passive: true })
     })
 }
+
+
 /**
  * Adds static attributes to an element
  * 
@@ -238,7 +243,7 @@ export function generateId(length: number): string {
     for (var i = 0; i < length; i++) {
         result += characters.charAt(Math.floor(Math.random() * charactersLength));
     }
-    return `vytic-id-${result}`;
+    return `vytic - id - ${result} `;
 }
 
 /**
@@ -262,7 +267,8 @@ export function addCSS(style: string): void {
  */
 export function uniqueStylesheet(style: string, id: string): string {
     id = id.toLowerCase();
-    let newStyle = style.replace(/\s+{|{/g, `[${id}] {`);
+    let newStyle = style.replace(/\s+{|{/g, `[${id}] {
+        `);
     return newStyle;
 }
 
@@ -285,8 +291,6 @@ export function updateChildrens(vDom: VirtualDomInterface): void {
 export function updateProps(props: { [key: string]: string }, componentData: { [key: string]: string }, heap: Object): void {
     for (let key in props) {
         componentData[key] = parseString(props[key], heap)
-
     }
-    console.log(props)
 
 }
