@@ -122,9 +122,9 @@ export function nextTick() {
  */
 export function addHandlers(handlers, methods, element, heap) {
     handlers.forEach(([handler, method]) => {
-        element.addEventListener(handler, typeof methods[method] === "function" ? methods[method] : () => {
+        element.addEventListener(handler, typeof methods[method] === "function" ? heap[method] : () => {
             let objectKeyNames = Object.keys(heap).toString();
-            let result = new Function(`let { ${objectKeyNames} } = this;   ${method};  return {${objectKeyNames}}`).call(heap);
+            let result = new Function(`let { ${objectKeyNames} } = this;   ${method};  return this`).call(heap);
             Object.assign(heap, result);
         }, { passive: true });
     });

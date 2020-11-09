@@ -2,7 +2,7 @@
 <html lang="en">
   <body>
     <div id="root">
-      <button @click="counter++">Increase</button>
+      <button @click="inc(this.counter)">Increase</button>
       <p>Counter: {{counter}}</p>
     </div>
   </body>
@@ -11,12 +11,11 @@
     let vytic = new Vytic({
       root: document.getElementById("root"),
       data: {
-        counter: 0,
+        counter: 1,
       },
       methods: {
-        inc() {
-          this.counter++;
-          console.log(this);
+        inc(c) {
+          this.counter += c;
         },
       },
     });

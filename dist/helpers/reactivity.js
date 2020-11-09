@@ -25,7 +25,7 @@ export class Reactivity {
     makeReactive() {
         let reactiveData = new Proxy(this.heap, this.proxyHandler());
         for (let key in this.methods) {
-            this.methods[key] = this.methods[key].bind(reactiveData);
+            this.heap[key] = this.heap[key].bind(reactiveData);
         }
         this.heap = reactiveData;
         return reactiveData;

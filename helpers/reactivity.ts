@@ -35,7 +35,7 @@ export class Reactivity {
     vDom: VirtualDomInterface;
     methods: MethodsInterface;
     updating: Boolean;
-    heap: Object
+    heap: { [key: string]: any }
     components: ComponentType
     parent: Element
     index: number
@@ -57,7 +57,7 @@ export class Reactivity {
     makeReactive(): Object {
         let reactiveData = new Proxy(this.heap, this.proxyHandler());
         for (let key in this.methods) {
-            this.methods[key] = this.methods[key].bind(reactiveData)
+            this.heap[key] = this.heap[key].bind(reactiveData)
         }
         this.heap = reactiveData
         return reactiveData

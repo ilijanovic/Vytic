@@ -142,12 +142,11 @@ export function nextTick(): Promise<number> {
  * @param {Object} methods - Object that contains all methods
  * @param {Element} element - Element where the event handlers will be attached 
  */
-export function addHandlers(handlers: string[][], methods: MethodsInterface, element: Element, heap: Object): void {
+export function addHandlers(handlers: string[][], methods: MethodsInterface, element: Element, heap: { [key: string]: any }): void {
     handlers.forEach(([handler, method]) => {
-        element.addEventListener(handler, typeof methods[method] === "function" ? methods[method] : () => {
+        element.addEventListener(handler, typeof methods[method] === "function" ? heap[method] : () => {
             let objectKeyNames = Object.keys(heap).toString()
-
-            let result = new Function(`let { ${objectKeyNames} } = this;   ${method};  return {${objectKeyNames}}`).call(heap)
+            let result = new Function(`let { ${objectKeyNames} } = this;   ${method};  return this`).call(heap)
             Object.assign(heap, result)
         }, { passive: true })
     })

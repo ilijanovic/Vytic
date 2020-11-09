@@ -136,6 +136,17 @@ You can attach event handlers with `@` and then the event name.
 
 Example: `@click`
 
+There are currently 3 ways to update the data with an event handler:
+
+1. Directly: `@click="this.counter = 5"`
+   Note here: You need to use `this` to be able to mutate the data
+
+2. Pass in an method: `@click="myMethod"`
+   When you pass methods you dont need `this`
+
+3. Pass in an method with an argument: `@click="myMethod(this.counter)"`
+   The method does not need `this` only the data
+
 ## Create Vytic components
 
 You can create components with Vytic. An component is just a simple Object with information in it.
