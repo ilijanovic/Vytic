@@ -1,19 +1,3 @@
-let root = /*html */ `
-    <div class="app">
-        <div>
-            <p>Increase counter over 5</p>
-            <p class="counter">Counter: {{counter}}</p>
-        </div>
-        <primary @click="this.counter--">
-            <p>-</p>
-        </primary>
-        <secondary @click="this.counter++">
-            <p>+</p>
-        </secondary>
-        <box p:counter="counter" if="counter > 5"></box>
-    </div>
-`;
-
 let style = /*css */ `
     .app {
         max-width: 500px;
@@ -27,7 +11,27 @@ let style = /*css */ `
         margin: 20px 0;
     }
 `;
-
+let root = /*html */ `
+    <div class="app">
+        <div>
+        <button @click="add">Add</button>
+        <input @keyup="add" @input="writename" a:value="nameinput" />
+            <div loop="names-name">
+                <p>Name: {{name}}</p>
+            </div>
+            <p class="counter">Counter: {{counter}}</p>
+        </div>
+       
+        <primary @click="this.counter--">
+            <p>-</p>
+        </primary>
+        <secondary if="visible" @click="this.counter++">
+            <p>+</p>
+        </secondary>
+        <box p:counter="counter" if="counter > 5"></box>
+  
+    </div>
+`;
 import { primary, secondary } from "./components/buttons.js";
 import box from "./components/box.js";
 export default {
@@ -35,6 +39,18 @@ export default {
   style,
   data: {
     counter: 0,
+    visible: true,
+    names: ["ilija"],
+    nameinput: "",
+  },
+  methods: {
+    add() {
+      this.names.push(this.nameinput);
+      this.nameinput = "";
+    },
+    writename(e) {
+      this.nameinput = e.target.value;
+    },
   },
   components: {
     primary,

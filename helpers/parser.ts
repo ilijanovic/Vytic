@@ -19,7 +19,13 @@ export function parseHTML(html: Element, styleId: string): VirtualDomInterface {
         children: Array.from(html.children).map(child => parseHTML(child, styleId)),
         attributes: collectAttributes(html),
         componentData: {},
+        loopitem: null
     }
+}
+
+export interface LoopInterface {
+    name: string,
+    value: any
 }
 export interface VirtualDomInterface {
     tag: string,
@@ -30,5 +36,6 @@ export interface VirtualDomInterface {
     styleId: string,
     element: HTMLElement,
     staticNode: Boolean,
-    componentData: { [key: string]: any }
+    componentData: { [key: string]: any },
+    loopitem?: LoopInterface
 }

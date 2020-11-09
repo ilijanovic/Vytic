@@ -19,5 +19,6 @@ export function parseHTML(html, styleId) {
         children: Array.from(html.children).map(child => parseHTML(child, styleId)),
         attributes: collectAttributes(html),
         componentData: {},
+        loopitem: null
     };
 }

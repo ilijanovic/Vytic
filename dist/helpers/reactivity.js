@@ -54,6 +54,9 @@ export class Reactivity {
         };
     }
     update({ vDom, methods, components, parent, once = false, styleId = "" }) {
+        if (vDom.loopitem) {
+            this.heap[vDom.loopitem.name] = vDom.loopitem.value;
+        }
         if (vDom.tag === "SLOT") {
             this.slots.forEach(slotChild => {
                 if (slotChild) {
@@ -72,6 +75,17 @@ export class Reactivity {
         let bindedAttrs = vDom.attributes.bindedAttr;
         if (!parent) {
             parent = vDom.attributes.parent;
+        }
+        if (vDom.attributes.loop) {
+            let [strArr, strItem, strIndex] = vDom.attributes.loop;
+            let arr = this.heap[strArr];
+            let [child] = vDom.children;
+            vDom.children.length = 0;
+            arr.forEach(el => {
+                child.loopitem = { name: strItem, value: el };
+                child.text = null;
+                vDom.children.push(Object.assign({}, child));
+            });
         }
         if (once) {
             if (vDom.tag in components) {
@@ -117,10 +131,13 @@ export class Reactivity {
             addAttributes(attrs, vDom.element);
             updateClasses(classes, this.heap, vDom.element);
         }
+        if (vDom.attributes.loop) {
+            vDom.element.innerHTML = "";
+        }
         if (showStat !== null) {
             let value = !!parseString(showStat, this.heap);
             if (!value && visible) {
-                deleteElement(vDom.element);
+                deleteElement(vDom.element, parent);
                 vDom.text = "";
                 vDom.attributes.visible = false;
                 return;
@@ -131,7 +148,8 @@ export class Reactivity {
                     if (vDom.tag in idCollector) {
                         styleId = idCollector[vDom.tag];
                     }
-                    let vytic = new Vytic(Object.assign({ props: this.props, styleId, index: vDom.attributes.index, parent }, components[vDom.tag]));
+                    let slotElements = vDom.children.map(child => this.update({ vDom: child, styleId, parent, once, components, methods }));
+                    let vytic = new Vytic(Object.assign({ slots: slotElements, props: this.props, styleId, index: vDom.attributes.index, parent }, components[vDom.tag]));
                     vDom.element = vytic.getReactiveElement();
                     vDom.componentData = vytic.getReactiveData();
                     isComponent = true;
@@ -162,6 +180,8 @@ export class Reactivity {
             return vDom.element;
         if (!vDom.attributes.visible)
             return vDom.element;
+        if (vDom.attributes.loop)
+            once = true;
         for (let child of vDom.children) {
             let childElement = this.update({ vDom: child, methods, components, parent: vDom.element, once, styleId });
             if (once) {
@@ -172,6 +192,7 @@ export class Reactivity {
         }
         if (!vDom.staticNode) {
             let parsedText = parseString(vDom.originalText, this.heap);
+            console.log(parsedText, vDom.text);
             if (parsedText !== vDom.text) {
                 vDom.element.textContent = parsedText;
                 vDom.text = parsedText;

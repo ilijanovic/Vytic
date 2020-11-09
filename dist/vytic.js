@@ -90,4 +90,4 @@ function createWebComponent({ name, template, style = "", data = {}, methods = {
     window.customElements.define(name, classes[name]);
     return classes[name].shadow;
 }
-export { Vytic, nextTick };
+export { Vytic, nextTick, createWebComponent };

@@ -21,7 +21,8 @@ function parseHTML(html, styleId) {
         staticNode: staticNode,
         children: Array.from(html.children).map(function (child) { return parseHTML(child, styleId); }),
         attributes: utils_1.collectAttributes(html),
-        componentData: {}
+        componentData: {},
+        loopitem: null
     };
 }
 exports.parseHTML = parseHTML;

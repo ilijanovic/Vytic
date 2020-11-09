@@ -10,15 +10,8 @@ var __assign = (this && this.__assign) || function () {
     };
     return __assign.apply(this, arguments);
 };
-var __spreadArrays = (this && this.__spreadArrays) || function () {
-    for (var s = 0, i = 0, il = arguments.length; i < il; i++) s += arguments[i].length;
-    for (var r = Array(s), k = 0, i = 0; i < il; i++)
-        for (var a = arguments[i], j = 0, jl = a.length; j < jl; j++, k++)
-            r[k] = a[j];
-    return r;
-};
 exports.__esModule = true;
-exports.updateProps = exports.updateChildrens = exports.getPosition = exports.uniqueStylesheet = exports.addCSS = exports.generateId = exports.looseRef = exports.objectKeysToUppercase = exports.updateAttributes = exports.updateStylings = exports.updateClasses = exports.addAttributes = exports.addHandlers = exports.nextTick = exports.insertElement = exports.deleteElement = exports.parseStringToElement = exports.formatText = exports.collectAttributes = void 0;
+exports.updateProps = exports.updateChildrens = exports.getPosition = exports.uniqueStylesheet = exports.addCSS = exports.generateId = exports.looseRef = exports.objectKeysToUppercase = exports.updateAttributes = exports.updateStylings = exports.updateClasses = exports.addAttributes = exports.removeHandlers = exports.addHandlers = exports.nextTick = exports.insertElement = exports.deleteElement = exports.parseStringToElement = exports.formatText = exports.collectAttributes = void 0;
 var reactivity_1 = require("./reactivity");
 /**
  * Collects all attributes from an element.
@@ -58,6 +51,9 @@ function collectAttributes(element) {
             var prop = key.replace("p:", "");
             a.props[prop] = val;
         }
+        else if (key.startsWith("loop")) {
+            a.loop = val.split("-");
+        }
         else {
             a.attr.push([key, val]);
         }
@@ -71,6 +67,7 @@ function collectAttributes(element) {
         show: null,
         visible: true,
         props: {},
+        loop: null,
         parent: element.parentElement,
         index: element.parentElement ? Array.prototype.indexOf.call(element.parentElement.children, element) : 0
     });
@@ -118,8 +115,7 @@ exports.parseStringToElement = parseStringToElement;
  *
  * @param {HTMLElement} element - Element that will be deleted
  */
-function deleteElement(element) {
-    var parent = element.parentNode;
+function deleteElement(element, parent) {
     parent.removeChild(element);
 }
 exports.deleteElement = deleteElement;
@@ -155,12 +151,20 @@ exports.nextTick = nextTick;
 function addHandlers(handlers, methods, element, heap) {
     handlers.forEach(function (_a) {
         var handler = _a[0], method = _a[1];
-        element.addEventListener(handler, typeof methods[method] === "function" ? methods[method] : function () {
-            //TODO: Add handler for non functions
-        });
+        element.addEventListener(handler, typeof methods[method] === "function" ? heap[method] : function () {
+            var objectKeyNames = Object.keys(heap).toString();
+            new Function("let { " + objectKeyNames + " } = this;   " + method + ";  return this").call(heap);
+        }, { passive: true });
     });
 }
 exports.addHandlers = addHandlers;
+function removeHandlers(handlers, element, heap) {
+    handlers.forEach(function (_a) {
+        var handler = _a[0], method = _a[1];
+        element.removeEventListener(handler, heap[method]);
+    });
+}
+exports.removeHandlers = removeHandlers;
 /**
  * Adds static attributes to an element
  *
@@ -280,15 +284,15 @@ exports.addCSS = addCSS;
  */
 function uniqueStylesheet(style, id) {
     id = id.toLowerCase();
-    var newStyle = style.replace(/\s+{|{/g, "[" + id + "] {");
+    var newStyle = style.replace(/\s+{|{/g, "[" + id + "] {\n        ");
     return newStyle;
 }
 exports.uniqueStylesheet = uniqueStylesheet;
 function getPosition(element, parent) {
     if (parent === void 0) { parent = null; }
     if (!parent)
-        return __spreadArrays(element.parentElement.children).indexOf(element);
-    return __spreadArrays(parent.children).indexOf(element);
+        return Array.from(element.parentElement.children).indexOf(element);
+    return Array.from(parent.children).indexOf(element);
 }
 exports.getPosition = getPosition;
 function updateChildrens(vDom) {
@@ -305,6 +309,5 @@ function updateProps(props, componentData, heap) {
     for (var key in props) {
         componentData[key] = reactivity_1.parseString(props[key], heap);
     }
-    console.log(props);
 }
 exports.updateProps = updateProps;

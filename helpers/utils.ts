@@ -30,7 +30,10 @@ export function collectAttributes(element: Element): AttributesInterface {
         } else if (key.startsWith("p:")) {
             let prop = key.replace("p:", "");
             a.props[prop] = val
-        } else {
+        } else if (key.startsWith("loop")) {
+            a.loop = val.split("-")
+        }
+        else {
             a.attr.push([key, val])
         }
         return a
@@ -43,10 +46,13 @@ export function collectAttributes(element: Element): AttributesInterface {
         show: null,
         visible: true,
         props: {},
+        loop: null,
         parent: element.parentElement,
         index: element.parentElement ? Array.prototype.indexOf.call(element.parentElement.children, element) : 0
     })
 }
+
+
 export interface AttributesInterface {
     attr: string[][],
     handlers: string[][],
@@ -57,6 +63,7 @@ export interface AttributesInterface {
     visible: Boolean,
     parent: HTMLElement,
     index: number,
+    loop: string[],
     props: { [key: string]: string }
 }
 
@@ -108,8 +115,7 @@ export function parseStringToElement(template: string): Element {
  * 
  * @param {HTMLElement} element - Element that will be deleted
  */
-export function deleteElement(element: HTMLElement): void {
-    let parent = element.parentNode;
+export function deleteElement(element: HTMLElement, parent: Element): void {
     parent.removeChild(element)
 }
 
@@ -146,12 +152,17 @@ export function addHandlers(handlers: string[][], methods: MethodsInterface, ele
     handlers.forEach(([handler, method]) => {
         element.addEventListener(handler, typeof methods[method] === "function" ? heap[method] : () => {
             let objectKeyNames = Object.keys(heap).toString()
-            let result = new Function(`let { ${objectKeyNames} } = this;   ${method};  return this`).call(heap)
-            Object.assign(heap, result)
+            new Function(`let { ${objectKeyNames} } = this;   ${method};  return this`).call(heap)
+
         }, { passive: true })
     })
 }
 
+export function removeHandlers(handlers: string[][], element: Element, heap: { [key: string]: any }): void {
+    handlers.forEach(([handler, method]) => {
+        element.removeEventListener(handler, heap[method])
+    })
+}
 
 /**
  * Adds static attributes to an element
@@ -164,6 +175,8 @@ export function addAttributes(attributes: string[][], element: Element): void {
         element.setAttribute(attribute, value)
     })
 }
+
+
 /**
  * Updates binded classes
  * 

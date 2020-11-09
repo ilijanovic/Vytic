@@ -33,6 +33,9 @@ export function collectAttributes(element) {
             let prop = key.replace("p:", "");
             a.props[prop] = val;
         }
+        else if (key.startsWith("loop")) {
+            a.loop = val.split("-");
+        }
         else {
             a.attr.push([key, val]);
         }
@@ -46,6 +49,7 @@ export function collectAttributes(element) {
         show: null,
         visible: true,
         props: {},
+        loop: null,
         parent: element.parentElement,
         index: element.parentElement ? Array.prototype.indexOf.call(element.parentElement.children, element) : 0
     });
@@ -90,8 +94,7 @@ export function parseStringToElement(template) {
  *
  * @param {HTMLElement} element - Element that will be deleted
  */
-export function deleteElement(element) {
-    let parent = element.parentNode;
+export function deleteElement(element, parent) {
     parent.removeChild(element);
 }
 /**
@@ -124,9 +127,13 @@ export function addHandlers(handlers, methods, element, heap) {
     handlers.forEach(([handler, method]) => {
         element.addEventListener(handler, typeof methods[method] === "function" ? heap[method] : () => {
             let objectKeyNames = Object.keys(heap).toString();
-            let result = new Function(`let { ${objectKeyNames} } = this;   ${method};  return this`).call(heap);
-            Object.assign(heap, result);
+            new Function(`let { ${objectKeyNames} } = this;   ${method};  return this`).call(heap);
         }, { passive: true });
+    });
+}
+export function removeHandlers(handlers, element, heap) {
+    handlers.forEach(([handler, method]) => {
+        element.removeEventListener(handler, heap[method]);
     });
 }
 /**

@@ -67,7 +67,7 @@ var Reactivity = /** @class */ (function () {
     Reactivity.prototype.makeReactive = function () {
         var reactiveData = new Proxy(this.heap, this.proxyHandler());
         for (var key in this.methods) {
-            this.methods[key] = this.methods[key].bind(reactiveData);
+            this.heap[key] = this.heap[key].bind(reactiveData);
         }
         this.heap = reactiveData;
         return reactiveData;
@@ -105,6 +105,9 @@ var Reactivity = /** @class */ (function () {
     Reactivity.prototype.update = function (_a) {
         var _this = this;
         var vDom = _a.vDom, methods = _a.methods, components = _a.components, parent = _a.parent, _b = _a.once, once = _b === void 0 ? false : _b, _c = _a.styleId, styleId = _c === void 0 ? "" : _c;
+        if (vDom.loopitem) {
+            this.heap[vDom.loopitem.name] = vDom.loopitem.value;
+        }
         if (vDom.tag === "SLOT") {
             this.slots.forEach(function (slotChild) {
                 if (slotChild) {
@@ -123,6 +126,17 @@ var Reactivity = /** @class */ (function () {
         var bindedAttrs = vDom.attributes.bindedAttr;
         if (!parent) {
             parent = vDom.attributes.parent;
+        }
+        if (vDom.attributes.loop) {
+            var _d = vDom.attributes.loop, strArr = _d[0], strItem_1 = _d[1], strIndex = _d[2];
+            var arr = this.heap[strArr];
+            var child_1 = vDom.children[0];
+            vDom.children.length = 0;
+            arr.forEach(function (el) {
+                child_1.loopitem = { name: strItem_1, value: el };
+                child_1.text = null;
+                vDom.children.push(__assign({}, child_1));
+            });
         }
         if (once) {
             if (vDom.tag in components) {
@@ -168,10 +182,13 @@ var Reactivity = /** @class */ (function () {
             utils_1.addAttributes(attrs, vDom.element);
             utils_1.updateClasses(classes, this.heap, vDom.element);
         }
+        if (vDom.attributes.loop) {
+            vDom.element.innerHTML = "";
+        }
         if (showStat !== null) {
             var value = !!parseString(showStat, this.heap);
             if (!value && visible) {
-                utils_1.deleteElement(vDom.element);
+                utils_1.deleteElement(vDom.element, parent);
                 vDom.text = "";
                 vDom.attributes.visible = false;
                 return;
@@ -182,7 +199,8 @@ var Reactivity = /** @class */ (function () {
                     if (vDom.tag in vytic_1.idCollector) {
                         styleId = vytic_1.idCollector[vDom.tag];
                     }
-                    var vytic = new vytic_1.Vytic(__assign({ props: this.props, styleId: styleId, index: vDom.attributes.index, parent: parent }, components[vDom.tag]));
+                    var slotElements = vDom.children.map(function (child) { return _this.update({ vDom: child, styleId: styleId, parent: parent, once: once, components: components, methods: methods }); });
+                    var vytic = new vytic_1.Vytic(__assign({ slots: slotElements, props: this.props, styleId: styleId, index: vDom.attributes.index, parent: parent }, components[vDom.tag]));
                     vDom.element = vytic.getReactiveElement();
                     vDom.componentData = vytic.getReactiveData();
                     isComponent = true;
@@ -205,15 +223,19 @@ var Reactivity = /** @class */ (function () {
         utils_1.updateAttributes(bindedAttrs, this.heap, vDom.element);
         utils_1.updateProps(vDom.attributes.props, vDom.componentData, this.heap);
         if (isComponent) {
-            for (var _i = 0, _d = vDom.children; _i < _d.length; _i++) {
-                var child = _d[_i];
+            for (var _i = 0, _e = vDom.children; _i < _e.length; _i++) {
+                var child = _e[_i];
                 this.update({ vDom: child, methods: methods, components: components, parent: vDom.element, once: false, styleId: styleId });
             }
         }
         if (isComponent)
             return vDom.element;
-        for (var _e = 0, _f = vDom.children; _e < _f.length; _e++) {
-            var child = _f[_e];
+        if (!vDom.attributes.visible)
+            return vDom.element;
+        if (vDom.attributes.loop)
+            once = true;
+        for (var _f = 0, _g = vDom.children; _f < _g.length; _f++) {
+            var child = _g[_f];
             var childElement = this.update({ vDom: child, methods: methods, components: components, parent: vDom.element, once: once, styleId: styleId });
             if (once) {
                 if (childElement) {
