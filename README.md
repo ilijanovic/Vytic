@@ -13,6 +13,14 @@ Its quite big because compilers / parsers are included here. Usually the project
 
 This project is inspired by Vue.js. Therefor you will see similar syntax.
 
+## My personal roadmap
+
+My goals are:
+
+1. Render loops, Image lazy loading with "lazy" attribute. Implementation on virtual DOM level, emitting data to parent component
+2. Vytic basic router
+3. Vytic basic store
+
 ## How to run it
 
 Install dependencies:
