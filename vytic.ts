@@ -131,7 +131,8 @@ function createWebComponent({ name, template, style = "", data = {}, methods = {
 
 export {
     Vytic,
-    nextTick
+    nextTick,
+    createWebComponent
 }
 
 
