@@ -9,7 +9,7 @@ Depending where you changed your data Vytic will only scan this particular DOM. 
 
 Current size is: < 25kb
 
-Its quite big because compilers / parsers are included here. Usually the project is compiled / parsed AOT so that Vytic just needs to render the generated VDOM structure. Upgrades will come in the future...
+Its quite big because compilers / parsers / scoped CSS generators are included here. Usually the project is compiled / parsed AOT so that Vytic just needs to render the generated VDOM structure. Upgrades will come in the future...
 
 This project is inspired by Vue.js. Therefor you will see similar syntax.
 
