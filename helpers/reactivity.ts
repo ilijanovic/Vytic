@@ -19,7 +19,6 @@ export interface UpdateInterface {
     once: Boolean,
     styleId?: string,
     skip?: Boolean,
-    module?: Function[]
 }
 export interface ReactivityInterface {
     vDom: VirtualDomInterface,
@@ -30,7 +29,8 @@ export interface ReactivityInterface {
     index?: number,
     styleId: string,
     slots: Element[],
-    props?: { [key: string]: string }
+    props?: { [key: string]: string },
+    module?: Function[]
 }
 
 export class Reactivity {
@@ -44,7 +44,8 @@ export class Reactivity {
     styleId: string
     slots: Element[]
     props: { [key: string]: string }
-    constructor({ vDom, slots, data, methods, components, parent, index, styleId, props }: ReactivityInterface) {
+    module?: Function[]
+    constructor({ module, vDom, slots, data, methods, components, parent, index, styleId, props }: ReactivityInterface) {
         this.methods = methods;
         this.updating = false
         this.components = components;
@@ -55,6 +56,7 @@ export class Reactivity {
         this.styleId = styleId
         this.slots = slots
         this.props = props
+        this.module = module
     }
     makeReactive(): Object {
         let reactiveData = new Proxy(this.heap, this.proxyHandler());
@@ -89,7 +91,7 @@ export class Reactivity {
             }.bind(this),
         };
     }
-    update({ module, vDom, methods, skip = false, components, parent, once = false, styleId = "" }: UpdateInterface): HTMLElement {
+    update({ vDom, methods, skip = false, components, parent, once = false, styleId = "" }: UpdateInterface): HTMLElement {
         if (skip) return
         if (vDom.tag === "SLOT") {
             this.slots.forEach(slotChild => {
@@ -192,13 +194,13 @@ export class Reactivity {
             }
         }
 
-        module.forEach(mod => mod(vDom, this.heap))
         updateStylings(stylings, this.heap, vDom.element)
         updateClasses(classes, this.heap, vDom.element)
         updateAttributes(bindedAttrs, this.heap, vDom.element)
 
         updateProps(vDom.attributes.props, vDom.componentData, this.heap)
 
+        this.module.forEach(mod => mod(vDom, this.heap))
         if (isComponent) {
             for (let child of vDom.children) {
                 this.update({ vDom: child, methods, components, parent: vDom.element, once: false, styleId })

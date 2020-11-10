@@ -26,23 +26,31 @@ let root = /*html */ `
         <secondary if="visible" @click="this.counter++">
             <p>+</p>
         </secondary>
+        <div lazy style="margin-top: 1500px"></div>
         <box p:counter="counter" if="counter > 1"></box>
-     
+        <img  lazy a:src="path" />
+        <img  lazy a:src="path" />
+        <img  lazy a:src="path" />
+        <img  lazy a:src="path" />
        
   
     </div>
 `;
 import { primary, secondary } from "./components/buttons.js";
 import box from "./components/box.js";
+import { lazy } from "./modules/lazy.js";
 export default {
   root,
   style,
   data: {
     counter: 0,
+    path:
+      "https://cdn.pixabay.com/photo/2020/11/04/19/22/windmill-5713337_960_720.jpg",
     visible: true,
     names: ["tome", "frank"],
     nameinput: "",
   },
+  module: [lazy],
   methods: {
     async add() {
       this.counter++;

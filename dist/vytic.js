@@ -12,7 +12,7 @@ import { parseStringToElement, nextTick, objectKeysToUppercase, looseRef } from 
  * @param {ShadowRoot | HTMLElement | Element} appendTo - Instead of replacing the root element with the parsed element, the element will be appended instead on the "appendAt" element
  */
 class Vytic {
-    constructor({ root = null, data = {}, props = {}, slots, styleId = undefined, methods = {}, appendTo, ready, parent, components = {}, index }) {
+    constructor({ root = null, module = [], data = {}, props = {}, slots, styleId = undefined, methods = {}, appendTo, ready, parent, components = {}, index }) {
         if (typeof root === "string") {
             root = parseStringToElement(root);
         }
@@ -24,7 +24,7 @@ class Vytic {
         let oldRoot = root;
         let vDom = parseHTML(root, styleId);
         this.vDom = vDom;
-        let reactivity = new Reactivity({ props, vDom, data, methods, components, parent, index, styleId, slots });
+        let reactivity = new Reactivity({ module, props, vDom, data, methods, components, parent, index, styleId, slots });
         let heap = reactivity.makeReactive();
         this.reactiveData = heap;
         let rootElement = reactivity.update({ vDom: reactivity.vDom, methods, components, parent, styleId, once: true });

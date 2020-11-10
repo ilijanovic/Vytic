@@ -10,7 +10,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 import { idCollector, Vytic } from "../vytic.js";
 import { addAttributes, addCSS, addHandlers, deleteElement, generateId, insertElement, nextTick, uniqueStylesheet, updateAttributes, updateChildrens, updateClasses, updateProps, updateStylings } from "./utils.js";
 export class Reactivity {
-    constructor({ vDom, slots, data, methods, components, parent, index, styleId, props }) {
+    constructor({ module, vDom, slots, data, methods, components, parent, index, styleId, props }) {
         this.methods = methods;
         this.updating = false;
         this.components = components;
@@ -21,6 +21,7 @@ export class Reactivity {
         this.styleId = styleId;
         this.slots = slots;
         this.props = props;
+        this.module = module;
     }
     makeReactive() {
         let reactiveData = new Proxy(this.heap, this.proxyHandler());
@@ -156,6 +157,7 @@ export class Reactivity {
         updateClasses(classes, this.heap, vDom.element);
         updateAttributes(bindedAttrs, this.heap, vDom.element);
         updateProps(vDom.attributes.props, vDom.componentData, this.heap);
+        this.module.forEach(mod => mod(vDom, this.heap));
         if (isComponent) {
             for (let child of vDom.children) {
                 this.update({ vDom: child, methods, components, parent: vDom.element, once: false, styleId });
