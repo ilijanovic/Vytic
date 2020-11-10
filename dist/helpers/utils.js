@@ -1,3 +1,4 @@
+import { checkEvent } from "./modifier.js";
 import { parseString } from "./reactivity.js";
 /**
  * Collects all attributes from an element.
@@ -12,7 +13,8 @@ export function collectAttributes(element) {
     ]).reduce((a, [key, val]) => {
         if (key.includes("@")) {
             let handlerName = key.replace("@", "");
-            a.handlers.push([handlerName, val]);
+            let [handler, ...modifiers] = handlerName.split(".");
+            a.handlers.push([{ handler, modifiers }, val]);
         }
         else if (key.startsWith("s:")) {
             let styleProp = key.replace("s:", "");
@@ -124,10 +126,20 @@ export function nextTick() {
  * @param {Element} element - Element where the event handlers will be attached
  */
 export function addHandlers(handlers, methods, element, heap) {
-    handlers.forEach(([handler, method]) => {
-        element.addEventListener(handler, typeof methods[method] === "function" ? heap[method] : () => {
+    handlers.forEach(([{ handler, modifiers }, method]) => {
+        element.addEventListener(handler, typeof methods[method] === "function" ? (e) => {
+            for (const modifier of modifiers) {
+                if (!checkEvent(e, modifier))
+                    return;
+            }
+            heap[method].call(heap, e);
+        } : (e) => {
+            for (const modifier of modifiers) {
+                if (!checkEvent(e, modifier))
+                    return;
+            }
             let objectKeyNames = Object.keys(heap).toString();
-            new Function(`let { ${objectKeyNames} } = this;   ${method};  return this`).call(heap);
+            new Function(`let { ${objectKeyNames} } = this;   ${method};  return this`).call(heap, e);
         }, { passive: true });
     });
 }

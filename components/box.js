@@ -2,8 +2,8 @@ let root = /*html */ `
     <div class="box">
         <p>Passed prop: {{counter}}</p>
         <p>Slider: {{slide}}</p>
-        <div s:background="slide > 30 ? 'blue': ''" class="width" s:width="slide * 10 + 'px'"></div>
-        <input a:value="slide" @input="slidechange" type="range" min="0" max="40" />
+        <div s:background="counter > 30 ? 'blue': ''" class="width" s:width="counter * 10 + 'px'"></div>
+        <input a:value="counter" @input="slidechange" type="range" min="0" max="40" />
     </div>
 `;
 
@@ -30,7 +30,7 @@ export default {
   },
   methods: {
     slidechange(e) {
-      this.slide = e.target.value;
+      this.counter = e.target.value;
     },
   },
   props: {

@@ -1,4 +1,5 @@
 
+import { checkEvent } from "./modifier"
 import { VirtualDomInterface } from "./parser"
 import { ComponentType, MethodsInterface, parseString } from "./reactivity"
 
@@ -15,7 +16,8 @@ export function collectAttributes(element: Element): AttributesInterface {
     ]).reduce((a: AttributesInterface, [key, val]) => {
         if (key.includes("@")) {
             let handlerName = key.replace("@", "")
-            a.handlers.push([handlerName, val])
+            let [handler, ...modifiers] = handlerName.split(".")
+            a.handlers.push([{ handler, modifiers }, val])
         } else if (key.startsWith("s:")) {
             let styleProp = key.replace("s:", "")
             a.bindedStyle.push([styleProp, val])
@@ -53,9 +55,10 @@ export function collectAttributes(element: Element): AttributesInterface {
 }
 
 
+export type HandlersType = [{ handler: string, modifiers: string[] }, string][]
 export interface AttributesInterface {
     attr: string[][],
-    handlers: string[][],
+    handlers: HandlersType,
     bindedStyle: string[][],
     bindedAttr: string[][]
     bindedClasses: string[][],
@@ -66,7 +69,6 @@ export interface AttributesInterface {
     loop: string[],
     props: { [key: string]: string }
 }
-
 interface StaticInterface {
     staticNode: Boolean,
     text: string
@@ -148,11 +150,19 @@ export function nextTick(): Promise<number> {
  * @param {Object} methods - Object that contains all methods
  * @param {Element} element - Element where the event handlers will be attached 
  */
-export function addHandlers(handlers: string[][], methods: MethodsInterface, element: Element, heap: { [key: string]: any }): void {
-    handlers.forEach(([handler, method]) => {
-        element.addEventListener(handler, typeof methods[method] === "function" ? heap[method] : () => {
+export function addHandlers(handlers: HandlersType, methods: MethodsInterface, element: Element, heap: { [key: string]: any }): void {
+    handlers.forEach(([{ handler, modifiers }, method]) => {
+        element.addEventListener(handler, typeof methods[method] === "function" ? (e: KeyboardEvent) => {
+            for (const modifier of modifiers) {
+                if (!checkEvent(e, modifier)) return
+            }
+            heap[method].call(heap, e)
+        } : (e: KeyboardEvent) => {
+            for (const modifier of modifiers) {
+                if (!checkEvent(e, modifier)) return
+            }
             let objectKeyNames = Object.keys(heap).toString()
-            new Function(`let { ${objectKeyNames} } = this;   ${method};  return this`).call(heap)
+            new Function(`let { ${objectKeyNames} } = this;   ${method};  return this`).call(heap, e)
 
         }, { passive: true })
     })
@@ -306,3 +316,4 @@ export function updateProps(props: { [key: string]: string }, componentData: { [
     }
 
 }
+

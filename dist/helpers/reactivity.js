@@ -53,10 +53,9 @@ export class Reactivity {
             }.bind(this),
         };
     }
-    update({ vDom, methods, components, parent, once = false, styleId = "" }) {
-        if (vDom.loopitem) {
-            this.heap[vDom.loopitem.name] = vDom.loopitem.value;
-        }
+    update({ vDom, methods, skip = false, components, parent, once = false, styleId = "" }) {
+        if (skip)
+            return;
         if (vDom.tag === "SLOT") {
             this.slots.forEach(slotChild => {
                 if (slotChild) {
@@ -75,17 +74,6 @@ export class Reactivity {
         let bindedAttrs = vDom.attributes.bindedAttr;
         if (!parent) {
             parent = vDom.attributes.parent;
-        }
-        if (vDom.attributes.loop) {
-            let [strArr, strItem, strIndex] = vDom.attributes.loop;
-            let arr = this.heap[strArr];
-            let [child] = vDom.children;
-            vDom.children.length = 0;
-            arr.forEach(el => {
-                child.loopitem = { name: strItem, value: el };
-                child.text = null;
-                vDom.children.push(Object.assign({}, child));
-            });
         }
         if (once) {
             if (vDom.tag in components) {
@@ -130,9 +118,6 @@ export class Reactivity {
             addHandlers(handlers, methods, vDom.element, this.heap);
             addAttributes(attrs, vDom.element);
             updateClasses(classes, this.heap, vDom.element);
-        }
-        if (vDom.attributes.loop) {
-            vDom.element.innerHTML = "";
         }
         if (showStat !== null) {
             let value = !!parseString(showStat, this.heap);
@@ -180,10 +165,8 @@ export class Reactivity {
             return vDom.element;
         if (!vDom.attributes.visible)
             return vDom.element;
-        if (vDom.attributes.loop)
-            once = true;
         for (let child of vDom.children) {
-            let childElement = this.update({ vDom: child, methods, components, parent: vDom.element, once, styleId });
+            let childElement = this.update({ skip, vDom: child, methods, components, parent: vDom.element, once, styleId });
             if (once) {
                 if (childElement) {
                     vDom.element.appendChild(childElement);
@@ -192,7 +175,6 @@ export class Reactivity {
         }
         if (!vDom.staticNode) {
             let parsedText = parseString(vDom.originalText, this.heap);
-            console.log(parsedText, vDom.text);
             if (parsedText !== vDom.text) {
                 vDom.element.textContent = parsedText;
                 vDom.text = parsedText;

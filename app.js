@@ -15,11 +15,9 @@ let root = /*html */ `
     <div class="app">
         <div>
         <button @click="add">Add</button>
-        <input @keyup="add" @input="writename" a:value="nameinput" />
-            <div loop="names-name">
-                <p>Name: {{name}}</p>
-            </div>
-            <p class="counter">Counter: {{counter}}</p>
+        <input @keyup.enter="this.counter++"  @input="writename" a:value="nameinput" />
+
+        <p class="counter">Counter: {{counter}}</p>
         </div>
        
         <primary @click="this.counter--">
@@ -28,7 +26,18 @@ let root = /*html */ `
         <secondary if="visible" @click="this.counter++">
             <p>+</p>
         </secondary>
+        <box p:counter="counter" if="counter > 1"></box>
+        <box p:counter="counter" if="counter > 2"></box>
+        <box p:counter="counter" if="counter > 3"></box>
+        <box p:counter="counter" if="counter > 4"></box>
         <box p:counter="counter" if="counter > 5"></box>
+        <box p:counter="counter" if="counter > 6"></box>
+        <box p:counter="counter" if="counter > 7"></box>
+        <box p:counter="counter" if="counter > 8"></box>
+        <box p:counter="counter" if="counter > 9"></box>
+        <box p:counter="counter" if="counter > 10"></box>
+        <box p:counter="counter" if="counter > 11"></box>
+       
   
     </div>
 `;
@@ -40,13 +49,12 @@ export default {
   data: {
     counter: 0,
     visible: true,
-    names: ["ilija"],
+    names: ["tome", "frank"],
     nameinput: "",
   },
   methods: {
-    add() {
-      this.names.push(this.nameinput);
-      this.nameinput = "";
+    async add() {
+      this.counter++;
     },
     writename(e) {
       this.nameinput = e.target.value;

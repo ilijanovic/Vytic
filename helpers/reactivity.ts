@@ -18,6 +18,7 @@ export interface UpdateInterface {
     parent: Element,
     once: Boolean,
     styleId?: string,
+    skip?: Boolean
 }
 export interface ReactivityInterface {
     vDom: VirtualDomInterface,
@@ -87,10 +88,8 @@ export class Reactivity {
             }.bind(this),
         };
     }
-    update({ vDom, methods, components, parent, once = false, styleId = "" }: UpdateInterface): HTMLElement {
-        if (vDom.loopitem) {
-            this.heap[vDom.loopitem.name] = vDom.loopitem.value
-        }
+    update({ vDom, methods, skip = false, components, parent, once = false, styleId = "" }: UpdateInterface): HTMLElement {
+        if (skip) return
         if (vDom.tag === "SLOT") {
             this.slots.forEach(slotChild => {
                 if (slotChild) {
@@ -110,18 +109,7 @@ export class Reactivity {
         if (!parent) {
             parent = vDom.attributes.parent
         }
-        if (vDom.attributes.loop) {
-            let [strArr, strItem, strIndex] = vDom.attributes.loop
-            let arr: any[] = this.heap[strArr]
-            let [child] = vDom.children
-            vDom.children.length = 0
 
-            arr.forEach(el => {
-                child.loopitem = { name: strItem, value: el }
-                child.text = null;
-                vDom.children.push({ ...child })
-            })
-        }
         if (once) {
             if (vDom.tag in components) {
                 if (vDom.tag in idCollector) {
@@ -166,9 +154,6 @@ export class Reactivity {
             addAttributes(attrs, vDom.element)
             updateClasses(classes, this.heap, vDom.element)
 
-        }
-        if (vDom.attributes.loop) {
-            vDom.element.innerHTML = ""
         }
         if (showStat !== null) {
             let value = !!parseString(showStat, this.heap)
@@ -216,15 +201,13 @@ export class Reactivity {
         if (isComponent) {
             for (let child of vDom.children) {
                 this.update({ vDom: child, methods, components, parent: vDom.element, once: false, styleId })
-
             }
         }
+
         if (isComponent) return vDom.element
         if (!vDom.attributes.visible) return vDom.element
-        if (vDom.attributes.loop) once = true
         for (let child of vDom.children) {
-
-            let childElement = this.update({ vDom: child, methods, components, parent: vDom.element, once, styleId })
+            let childElement = this.update({ skip, vDom: child, methods, components, parent: vDom.element, once, styleId })
             if (once) {
                 if (childElement) {
                     vDom.element.appendChild(childElement)
