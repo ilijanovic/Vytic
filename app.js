@@ -27,16 +27,7 @@ let root = /*html */ `
             <p>+</p>
         </secondary>
         <box p:counter="counter" if="counter > 1"></box>
-        <box p:counter="counter" if="counter > 2"></box>
-        <box p:counter="counter" if="counter > 3"></box>
-        <box p:counter="counter" if="counter > 4"></box>
-        <box p:counter="counter" if="counter > 5"></box>
-        <box p:counter="counter" if="counter > 6"></box>
-        <box p:counter="counter" if="counter > 7"></box>
-        <box p:counter="counter" if="counter > 8"></box>
-        <box p:counter="counter" if="counter > 9"></box>
-        <box p:counter="counter" if="counter > 10"></box>
-        <box p:counter="counter" if="counter > 11"></box>
+     
        
   
     </div>

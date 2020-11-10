@@ -18,7 +18,8 @@ export interface UpdateInterface {
     parent: Element,
     once: Boolean,
     styleId?: string,
-    skip?: Boolean
+    skip?: Boolean,
+    module?: Function[]
 }
 export interface ReactivityInterface {
     vDom: VirtualDomInterface,
@@ -88,7 +89,7 @@ export class Reactivity {
             }.bind(this),
         };
     }
-    update({ vDom, methods, skip = false, components, parent, once = false, styleId = "" }: UpdateInterface): HTMLElement {
+    update({ module, vDom, methods, skip = false, components, parent, once = false, styleId = "" }: UpdateInterface): HTMLElement {
         if (skip) return
         if (vDom.tag === "SLOT") {
             this.slots.forEach(slotChild => {
@@ -191,7 +192,7 @@ export class Reactivity {
             }
         }
 
-
+        module.forEach(mod => mod(vDom, this.heap))
         updateStylings(stylings, this.heap, vDom.element)
         updateClasses(classes, this.heap, vDom.element)
         updateAttributes(bindedAttrs, this.heap, vDom.element)

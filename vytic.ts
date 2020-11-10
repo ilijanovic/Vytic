@@ -1,5 +1,5 @@
 
-import { parseHTML } from "./helpers/parser"
+import { parseHTML, VirtualDomInterface } from "./helpers/parser"
 import { Reactivity, MethodsInterface, ComponentType } from "./helpers/reactivity"
 import { parseStringToElement, nextTick, objectKeysToUppercase, looseRef, generateId, uniqueStylesheet } from "./helpers/utils";
 
@@ -18,7 +18,7 @@ class Vytic {
     root: Element | ShadowRoot
     vDom: Object
     reactiveData: Object
-    constructor({ root = null, data = {}, props = {}, slots, styleId = undefined, methods = {}, appendTo, ready, parent, components = {}, index }: InputProps) {
+    constructor({ root = null, module = [], data = {}, props = {}, slots, styleId = undefined, methods = {}, appendTo, ready, parent, components = {}, index }: InputProps) {
         if (typeof root === "string") {
             root = parseStringToElement(root)
         } else if (!root) {
@@ -87,7 +87,8 @@ export interface InputProps {
     index?: number,
     styleId: string,
     slots?: Element[],
-    props?: { [key: string]: any }
+    props?: { [key: string]: any },
+    module?: Function[]
 }
 
 /**
@@ -128,6 +129,7 @@ function createWebComponent({ name, template, style = "", data = {}, methods = {
     window.customElements.define(name, classes[name]);
     return classes[name].shadow
 }
+
 
 export {
     Vytic,
