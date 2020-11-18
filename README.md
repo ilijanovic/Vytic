@@ -201,13 +201,13 @@ You can create components with Vytic. An component is just a simple Object with 
 You need to register your component in your Vytic instance:
 
 ```javascript
-    import redbutton from "./redbutton.js"
 
     <div id="root">
         <redbutton></redbutton>
     </div>
 
     <script type="module">
+    import redbutton from "./redbutton.js"
     new Vytic({
         root: document.getElementById("root"),
         components: {
