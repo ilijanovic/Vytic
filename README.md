@@ -35,6 +35,7 @@ Compile to javascript:
 
 The setup is following. Similar to vue:
 
+```javascript
     <body>
         <div id="root">
             <button @click="inc">Counter: {{count}}</button>
@@ -54,7 +55,7 @@ The setup is following. Similar to vue:
             }
         })
     </script>
-
+```
 ## Bindings
 
 ### Style binding
@@ -65,6 +66,7 @@ You can bind style properties with "s:".
 
 Example:
 
+```javascript
     <div id="root">
         <div s:background="color">I am red</div>
     </div>
@@ -77,6 +79,7 @@ Example:
         }
     })
     </script>
+```
 
 ### Class binding
 
@@ -85,7 +88,7 @@ You can toggle classes with "c:"
 "c" stands for class.
 
 Example:
-
+```javascript
     <div id="root">
         <div c:boxclass="added">I am red</div>
     </div>
@@ -102,7 +105,7 @@ Example:
     <style>
     .boxclass {  background: red }
     </style>
-
+```
 ### Attributes binding
 
 You can bind attributes with "a:"
@@ -110,7 +113,7 @@ You can bind attributes with "a:"
 "a" stands for attribute.
 
 Example
-
+```javascript
     <div id="root">
         <img a:src="path" />
     </div>
@@ -123,11 +126,11 @@ Example
         }
     })
     </script>
-
+```
 ## Toggle visibility
 
 You can use the "if" directive for toggeling elements.
-
+```javascript
     <div id="root">
         <button @click="toggle">Toggle</button>
         <div if="visible">Toggle me</div>
@@ -146,7 +149,7 @@ You can use the "if" directive for toggeling elements.
         }
     })
     </script>
-
+```
 ## Event handlers
 
 You can attach event handlers with `@` and then the event name.
@@ -169,7 +172,7 @@ I am working on it to be able to mutate the data without the need of `this`
 ## Create Vytic components
 
 You can create components with Vytic. An component is just a simple Object with information in it.
-
+```javascript
     // redbutton.js
 
     export default {
@@ -194,9 +197,10 @@ You can create components with Vytic. An component is just a simple Object with 
             }
         `
     }
-
+```
 You need to register your component in your Vytic instance:
 
+```javascript
     import redbutton from "./redbutton.js"
 
     <div id="root">
@@ -211,32 +215,32 @@ You need to register your component in your Vytic instance:
         }
     })
     </script>
-
+```
 The styling in your component is by default scoped.
 
 ## Slots
 
 You can use slots inside components.
-
+```javascript
     <custombutton>
         <p>Toggle</p>
     </custombutton>
-
+```
 Inside of your `custombutton` component you can use `<slot>`. The passed elements will be replaced with the `<slot>`
-
+```javascript
     <button>
        <slot></slot>
     </button>
-
+```
 Note here: Slots works currently only for elements. That means `<custombutton>Text</custombutton>` wont work. You will need to wrap it in an element like `<custombutton><p>Text</p></custombutton>`
 
 You can use multiple elements like:
-
+```javascript
     <custombutton>
         <p>Text 1</p>
         <p>Text 2</p>
     </custombutton>
-
+```
 Things like `if` or interpolation `{{ }}` still works.
 
 ## Create native web components
@@ -245,7 +249,7 @@ Vytic provides `createWebComponent` function that creates an reactive native web
 The difference between the example above and here is that you need `name` and you can add CSS styling to it witch is automatically scoped.
 
 Because they are native components you dont need to wrap them inside an root element.
-
+```javascript
     <body>
         <custom-button></custom-button>
     </body>
@@ -272,11 +276,11 @@ Because they are native components you dont need to wrap them inside an root ele
             }
         })
     </script>
-
+```
 ## Props
 
 You are able to pass props down to the component with the prop bindin `p:`
-
+```javascript
     <somecomponent p:propname="propvalue"></somecomponent>
 
     <script type="module">
@@ -290,9 +294,9 @@ You are able to pass props down to the component with the prop bindin `p:`
         }
     })
     </script>
-
+```
 In your component you need to register the props with the object `prop`
-
+```javascript
     export default {
     root: "<p>Value: {{propname}}",
     props: {
@@ -301,11 +305,11 @@ In your component you need to register the props with the object `prop`
         },
     },
     };
-
+```
 ## View Virtual DOM
 
 You can take a look how the Vytic virtual DOM looks like:
-
+```javascript
     <div id="root">
         <button @click="inc">Counter: {{counter}}</button>
     </div>
@@ -330,13 +334,13 @@ You can take a look how the Vytic virtual DOM looks like:
     console.log(vDom)
 
     </script>
-
+```
 ## Update the DOM outside of the framework
 
 The object `data` gets converted into an proxy object. Whenever you change some property inside the proxy object the virtual DOM of the current Vytic instance gets scanned and updates the real DOM if there are some changes.
 
 You can get the reactive data object with `getReactiveData()`
-
+```javascript
     <div id="root">
         <p>Counter: {{counter}}</p>
     </div>
@@ -355,7 +359,7 @@ You can get the reactive data object with `getReactiveData()`
     proxy.counter = 5;
 
     </script>
-
+```
 Instead of `0` you will see `5`
 
 You can use vanilla javascript to update the DOM by just changing the property `counter`
